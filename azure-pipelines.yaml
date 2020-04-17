@@ -1,0 +1,79 @@
+name: $(Date:yyyyMMdd).$(Rev:r)
+variables:
+  DOCKER_IMAGE_BASENAME: "jamesits/ripe-atlas"
+
+trigger:
+  batch: true
+  branches:
+    include: [ "master" ]
+  paths:
+    include: [ "*" ]
+    exclude: [ "README.md" ]
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - README.md
+
+schedules:
+  - cron: "0 3 * * *"
+    displayName: nightly build
+    always: true
+    branches:
+      include:
+      - master
+
+jobs:
+  - job: docker_nightly
+    displayName: "docker nightly image build"
+    pool:
+      vmImage: "ubuntu-latest"
+    workspace:
+      clean: all
+    timeoutInMinutes: 20
+
+    steps:
+    - checkout: self
+      clean: true
+      submodules: true
+
+    - bash: |
+        set -Eeuo pipefail
+        docker build --rm=false -t ripe-atlas .
+        docker images --digests ripe-atlas
+        docker cp $(docker ps -a -f "label=image=ripe-atlas-builder" -f "status=exited" --format "{{.ID}}"):/root ${BUILD_ARTIFACTSTAGINGDIRECTORY}
+      displayName: "Build image"
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+        artifactName: 'deb'
+        parallel: true
+        parallelCount: 10
+
+    - task: Docker@1
+      displayName: "Docker login"
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: "Docker Hub: Jamesits"
+        command: login
+
+    - bash: |
+        set -Eeuo pipefail
+        docker tag dst $(DOCKER_IMAGE_BASENAME):nightly
+        docker push $(DOCKER_IMAGE_BASENAME):nightly
+      displayName: "Push image"
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
+
+    - task: Docker@1
+      displayName: "Docker logout"
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
+      inputs:
+        containerregistrytype: 'Container Registry'
+        dockerRegistryEndpoint: "Docker Hub: Jamesits"
+        command: logout

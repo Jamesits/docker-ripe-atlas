@@ -47,6 +47,8 @@ jobs:
         docker images --digests ripe-atlas
         BUILDER_IMAGE_ID=$(docker ps -a --format="{{.ID}}" --filter="label=image=ripe-atlas-builder" --filter="status=exited" --latest)
         docker cp "$BUILDER_IMAGE_ID":/root /tmp
+        rm -rf /tmp/root/atlasswprobe-*-work
+        rm -rf /tmp/root/atlasswprobe-*/var/atlas-probe/data
         cp -r /tmp/root/atlasswprobe* ${BUILD_ARTIFACTSTAGINGDIRECTORY}
       displayName: "Build image"
 
@@ -55,7 +57,7 @@ jobs:
         pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
         artifactName: 'deb'
         parallel: true
-        parallelCount: 10
+        parallelCount: 20
 
     - task: Docker@1
       displayName: "Docker login"

@@ -9,7 +9,7 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 * 1 CPU core (of course)
 * 20MiB memory
 * 100MiB HDD
-* A linux installation with Docker installed
+* A Linux installation with Docker installed
 * Internet access
 
 ## Running

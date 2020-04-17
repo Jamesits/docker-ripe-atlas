@@ -25,7 +25,7 @@ RUN apt-get update -y \
 	&& dpkg -i /tmp/atlasswprobe-*.deb \
 	&& apt-get install -fy \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& rm- rf /tmp/atlasswprobe-*.deb
+	&& rm -f /tmp/atlasswprobe-*.deb
 
 RUN ln -s /usr/local/atlas/bin/ATLAS /usr/local/bin/atlas
 COPY entrypoint.sh /usr/local/bin

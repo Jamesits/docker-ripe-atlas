@@ -17,7 +17,7 @@ docker run -d \
 	--mount type=bind,src=/var/atlas-probe/etc,dst=/var/atlas-probe/etc \
 	--mount type=bind,src=/var/atlas-probe/status,dst=/var/atlas-probe/status \
 	--name ripe-atlas \
-	jamesits/ripe-atlas:latest
+	jamesits/ripe-atlas:nightly
 ```
 
 Then we fetch the generated public key:

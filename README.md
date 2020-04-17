@@ -17,7 +17,7 @@ docker run -d \
 	--mount type=bind,src=/var/atlas-probe/etc,dst=/var/atlas-probe/etc \
 	--mount type=bind,src=/var/atlas-probe/status,dst=/var/atlas-probe/status \
 	--name ripe-atlas \
-	jamesits/ripe-atlas:nightly
+	jamesits/ripe-atlas:latest
 ```
 
 Then we fetch the generated public key:
@@ -45,7 +45,9 @@ docker network create --ipv6 --subnet=fd00:a1a3::/48 ripe-atlas-network
 docker run -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro --cap-drop=ALL --cap-add=NET_RAW --cap-add=NET_ADMIN --cap-add=SYS_MODULE --net=host --name=ipv6nat robbertkl/ipv6nat:latest
 ```
 
-Then start the RIPE Atlas container with argument `--net=ripe-atlas-network`.
+Then start the RIPE Atlas container with argument `--net=ripe-atlas-network`. 
+
+Note this might break your network and your mileage may vary. You should swap `eth0` with your primary network adapter name, and if you use static IPv6 assignment instead of SLAAC, change `accept_ra` to `0`.
 
 ### Auto Update
 

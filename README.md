@@ -56,3 +56,8 @@ docker run -d -v /var/run/docker.sock:/var/run/docker.sock --name watchtower con
 ```
 
 Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.watchtower.enable=true`.
+
+### Backup
+
+All the config files are stored at `/var/atlas-probe`. Just backup it.
+

@@ -69,8 +69,8 @@ jobs:
 
     - bash: |
         set -Eeuo pipefail
-        docker tag ripe-atlas $(DOCKER_IMAGE_BASENAME):nightly
-        docker push $(DOCKER_IMAGE_BASENAME):nightly
+        docker tag ripe-atlas $(DOCKER_IMAGE_BASENAME):latest
+        docker push $(DOCKER_IMAGE_BASENAME):latest
       displayName: "Push image"
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
 

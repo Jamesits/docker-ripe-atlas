@@ -43,13 +43,15 @@ jobs:
 
     - bash: |
         set -Eeuo pipefail
+
         docker build --rm=false -t ripe-atlas .
         docker images --digests ripe-atlas
+
         BUILDER_IMAGE_ID=$(docker ps -a --format="{{.ID}}" --filter="label=image=ripe-atlas-builder" --filter="status=exited" --latest)
         docker cp "$BUILDER_IMAGE_ID":/root /tmp
         rm -rf /tmp/root/atlasswprobe-*-work
-        rm -rf /tmp/root/atlasswprobe-*/var/atlas-probe/data
-        cp -r /tmp/root/atlasswprobe* ${BUILD_ARTIFACTSTAGINGDIRECTORY}
+        tar -cvzf ${BUILD_ARTIFACTSTAGINGDIRECTORY}/build-artifacts.tar.gz /tmp/root/atlasswprobe-*/
+        cp -r /tmp/root/atlasswprobe-*.deb ${BUILD_ARTIFACTSTAGINGDIRECTORY}
       displayName: "Build image"
 
     - task: PublishBuildArtifacts@1

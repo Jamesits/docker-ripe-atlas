@@ -4,6 +4,14 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 
 [![Build Status](https://dev.azure.com/nekomimiswitch/General/_apis/build/status/docker-ripe-atlas?branchName=master)](https://dev.azure.com/nekomimiswitch/General/_build/latest?definitionId=83&branchName=master)
 
+## Requirements
+
+* 1 CPU core (of course)
+* 20MiB memory
+* 100MiB HDD
+* A linux installation with Docker installed
+* Internet access
+
 ## Running
 
 First we start the container:
@@ -26,7 +34,7 @@ Then we fetch the generated public key:
 cat /var/atlas-probe/etc/probe_key.pub
 ```
 
-[Register](https://atlas.ripe.net/apply/swprobe/) the probe with your public key.
+[Register](https://atlas.ripe.net/apply/swprobe/) the probe with your public key. After the registration being manually processed, you'll see your new probe in your account.
 
 ## Caveats
 

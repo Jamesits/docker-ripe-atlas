@@ -13,7 +13,7 @@ docker run -d \
 	--restart=always \
 	--memory=256m \
 	--cap-add=SYS_ADMIN --cap-add=CAP_NET_RAW --cap-add=CAP_CHOWN \
-	--mount type=tmpfs,destination=/var/atlasdata \
+	--mount type=tmpfs,destination=/var/atlasdata,tmpfs-size=128M \
 	-v /var/atlas-probe/etc:/var/atlas-probe/etc \
 	-v /var/atlas-probe/status:/var/atlas-probe/status \
 	--name ripe-atlas \

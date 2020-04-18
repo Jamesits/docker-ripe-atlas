@@ -17,14 +17,14 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 First we start the container:
 
 ```shell
-docker run -d \
-	--restart=always \
-	--memory=256m \
+docker run --detach --restart=always \
+	--cpus=1 --memory=64m --memory-reservation=64m \
 	--cap-add=SYS_ADMIN --cap-add=CAP_NET_RAW --cap-add=CAP_CHOWN \
-	--mount type=tmpfs,destination=/var/atlasdata,tmpfs-size=128M \
+	--mount type=tmpfs,destination=/var/atlasdata,tmpfs-size=64M \
 	-v /var/atlas-probe/etc:/var/atlas-probe/etc \
 	-v /var/atlas-probe/status:/var/atlas-probe/status \
-	--name ripe-atlas \
+	-e RXTXRPT=yes \
+	--name ripe-atlas --hostname "$(hostname --fqdn)" \
 	jamesits/ripe-atlas:latest
 ```
 

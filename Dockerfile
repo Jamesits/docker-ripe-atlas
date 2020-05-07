@@ -1,3 +1,4 @@
+## builder
 FROM debian:10-slim as builder
 LABEL image="ripe-atlas-builder"
 ARG DEBIAN_FRONTEND=noninteractive
@@ -9,27 +10,26 @@ RUN apt-get update -y \
 WORKDIR /root
 
 RUN git clone --recursive "$GIT_URL"
-
 RUN ./ripe-atlas-software-probe/build-config/debian/bin/make-deb
 
+## the actual image
 FROM debian:10-slim
 LABEL maintainer="dockerhub@public.swineson.me"
-
+LABEL image="ripe-atlas"
 ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=builder /root/atlasswprobe-*.deb /tmp
 
-RUN ln -s /bin/true /bin/systemctl
-RUN apt-get update -y \
+RUN ln -s /bin/true /bin/systemctl \
+	&& apt-get update -y \
 	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools gosu \
 	&& dpkg -i /tmp/atlasswprobe-*.deb \
 	&& apt-get install -fy \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& rm -f /tmp/atlasswprobe-*.deb
+	&& rm -f /tmp/atlasswprobe-*.deb \
+	&& ln -s /usr/local/atlas/bin/ATLAS /usr/local/bin/atlas
 
-RUN ln -s /usr/local/atlas/bin/ATLAS /usr/local/bin/atlas
 COPY entrypoint.sh /usr/local/bin
-
 RUN chmod +x /usr/local/bin/* \
 	&& groupadd -fr atlas \
 	&& usermod -aG atlas atlas \
@@ -43,3 +43,4 @@ VOLUME [ "/var/atlas-probe/etc", "/var/atlas-probe/status" ]
 
 ENTRYPOINT [ "entrypoint.sh" ]
 CMD [ "atlas" ]
+

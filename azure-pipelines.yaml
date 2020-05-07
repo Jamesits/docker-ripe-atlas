@@ -29,7 +29,7 @@ schedules:
 
 jobs:
   - job: docker_nightly
-    displayName: "docker nightly image build"
+    displayName: "docker"
     pool:
       name: "$(POOL)"
       vmImage: "ubuntu-latest"
@@ -96,3 +96,10 @@ jobs:
         containerregistrytype: 'Container Registry'
         dockerRegistryEndpoint: "Docker Hub: Jamesits"
         command: logout
+
+    - bash: |
+        docker system prune --all --force --filter "label=image=ripe-atlas-builder"
+        docker system prune --all --force --filter "label=image=ripe-atlas"
+
+      displayName: "Clean up"
+

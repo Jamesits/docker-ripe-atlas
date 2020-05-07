@@ -12,6 +12,13 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 * A Linux installation with Docker installed
 * Internet access
 
+## Tags
+
+The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas):
+
+* `latest`: For arm64 (x86\_64) devices
+* `latest-armv7l`: For armv7l (armhf) devices, e.g. Raspberry Pi (CI donated by [@OtakuNekoP](https://github.com/OtakuNekoP))
+
 ## Running
 
 First we start the container:

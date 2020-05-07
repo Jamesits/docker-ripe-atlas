@@ -43,9 +43,9 @@ jobs:
           ARCH: "amd64"
           DOCKER_IMAGE_TAG: "latest"
           POOL: "Azure Pipelines"
-        arm32:
-          ARCH: "arm32"
-          DOCKER_IMAGE_TAG: "latest-arm32"
+        armv7l:
+          ARCH: "armv7l"
+          DOCKER_IMAGE_TAG: "latest-armv7l"
           POOL: "OtakuNeko ARM32"
       maxParallel: 2
 

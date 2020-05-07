@@ -31,10 +31,23 @@ jobs:
   - job: docker_nightly
     displayName: "docker nightly image build"
     pool:
+      name: "$(POOL)"
       vmImage: "ubuntu-latest"
     workspace:
       clean: all
     timeoutInMinutes: 20
+    
+    strategy:
+      matrix:
+        amd64:
+          ARCH: "amd64"
+          DOCKER_IMAGE_TAG: "latest"
+          POOL: "Azure Pipelines"
+        arm32:
+          ARCH: "arm32"
+          DOCKER_IMAGE_TAG: "latest-arm32"
+          POOL: "OtakuNeko ARM32"
+      maxParallel: 2
 
     steps:
     - checkout: self
@@ -57,7 +70,7 @@ jobs:
     - task: PublishBuildArtifacts@1
       inputs:
         pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
-        artifactName: 'deb'
+        artifactName: '$(ARCH)'
         parallel: true
         parallelCount: 20
 
@@ -71,8 +84,8 @@ jobs:
 
     - bash: |
         set -Eeuo pipefail
-        docker tag ripe-atlas $(DOCKER_IMAGE_BASENAME):latest
-        docker push $(DOCKER_IMAGE_BASENAME):latest
+        docker tag ripe-atlas $(DOCKER_IMAGE_BASENAME):$(DOCKER_IMAGE_TAG)
+        docker push $(DOCKER_IMAGE_BASENAME):$(DOCKER_IMAGE_TAG)
       displayName: "Push image"
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
 

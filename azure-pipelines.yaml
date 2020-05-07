@@ -35,7 +35,7 @@ jobs:
       vmImage: "ubuntu-latest"
     workspace:
       clean: all
-    timeoutInMinutes: 20
+    timeoutInMinutes: 60
     
     strategy:
       matrix:

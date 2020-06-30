@@ -56,6 +56,8 @@ jobs:
 
     - bash: |
         set -Eeuo pipefail
+        
+        docker stop watchtower || true
 
         docker build --rm=false -t ripe-atlas .
         docker images --digests ripe-atlas
@@ -100,6 +102,11 @@ jobs:
     - bash: |
         docker system prune --all --force --filter "label=image=ripe-atlas-builder"
         docker system prune --all --force --filter "label=image=ripe-atlas"
+        
+        docker volume prune --force --filter "label=image=ripe-atlas-builder"
+        docker volume prune --force --filter "label=image=ripe-atlas"
+        
+        docker start watchtower || true
 
       displayName: "Clean up"
 

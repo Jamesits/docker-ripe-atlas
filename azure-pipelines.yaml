@@ -59,7 +59,7 @@ jobs:
         
         docker stop watchtower || true
 
-        docker build --rm=false -t ripe-atlas .
+        docker build --no-cache --rm=false -t ripe-atlas .
         docker images --digests ripe-atlas
 
         BUILDER_IMAGE_ID=$(docker ps -a --format="{{.ID}}" --filter="label=image=ripe-atlas-builder" --filter="status=exited" --latest)

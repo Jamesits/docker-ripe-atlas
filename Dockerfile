@@ -20,7 +20,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 COPY --from=builder /root/atlasswprobe-*.deb /tmp
 
+ARG ATLAS_UID=101
+ARG ATLAS_GID=999
 RUN ln -s /bin/true /bin/systemctl \
+	&& adduser --system --uid $ATLAS_UID atlas \
+	&& groupadd --force --system --gid $ATLAS_GID atlas \
+	&& usermod -aG atlas atlas \
 	&& apt-get update -y \
 	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools gosu \
 	&& dpkg -i /tmp/atlasswprobe-*.deb \
@@ -31,8 +36,6 @@ RUN ln -s /bin/true /bin/systemctl \
 
 COPY entrypoint.sh /usr/local/bin
 RUN chmod +x /usr/local/bin/* \
-	&& groupadd -fr atlas \
-	&& usermod -aG atlas atlas \
 	&& chown -R atlas:atlas /var/atlas-probe \
 	&& mkdir -p /var/atlasdata \
 	&& chown -R atlas:atlas /var/atlasdata \

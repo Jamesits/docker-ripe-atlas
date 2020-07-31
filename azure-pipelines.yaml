@@ -100,11 +100,11 @@ jobs:
         command: logout
 
     - bash: |
-        docker system prune --all --force --filter "label=image=ripe-atlas-builder"
-        docker system prune --all --force --filter "label=image=ripe-atlas"
-        
         docker volume prune --force --filter "label=image=ripe-atlas-builder"
         docker volume prune --force --filter "label=image=ripe-atlas"
+        
+        docker system prune --all --force --filter "label=image=ripe-atlas-builder"
+        docker system prune --all --force --filter "label=image=ripe-atlas"
         
         docker start watchtower || true
 

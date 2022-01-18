@@ -13,7 +13,7 @@ mkdir -p /var/atlas-probe/etc
 chown -R atlas:atlas /var/atlas-probe/etc
 mkdir -p /var/atlas-probe/state
 chown -R atlas:atlas /var/atlas-probe/state
-echo "" > "${CONFIG_FILE}"
+echo "CHECK_ATLASDATA_TMPFS=no" > "${CONFIG_FILE}"
 
 # set probe configuration
 for OPT in "${OPTIONS[@]}"; do

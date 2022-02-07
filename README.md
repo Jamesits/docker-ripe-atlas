@@ -24,7 +24,8 @@ The following prebuilt tags are available at [Docker Hub](https://hub.docker.com
 First we start the container:
 
 ```shell
-docker run --detach --restart=always --log-opt max-size=10m \
+docker run --detach --restart=always \
+	--log-driver json-file --log-opt max-size=10m \
 	--cpus=1 --memory=64m --memory-reservation=64m \
 	--cap-add=SYS_ADMIN --cap-add=NET_RAW --cap-add=CHOWN \
 	-v /var/atlas-probe/etc:/var/atlas-probe/etc \

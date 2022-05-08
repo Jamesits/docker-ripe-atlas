@@ -69,7 +69,7 @@ Note this might break your network and your mileage may vary. You should swap `e
 Use this recipe for auto updating the docker container.
 
 ```shell
-docker run -d -v /var/run/docker.sock:/var/run/docker.sock --name watchtower containrrr/watchtower --cleanup --label-enable
+docker run --detach --restart=always -v /var/run/docker.sock:/var/run/docker.sock --name watchtower containrrr/watchtower --cleanup --label-enable
 ```
 
 Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.watchtower.enable=true`.

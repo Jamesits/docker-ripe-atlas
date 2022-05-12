@@ -28,26 +28,34 @@ schedules:
       - master
 
 jobs:
-  - job: docker_nightly
-    displayName: "docker"
+  - job: build
+    displayName: "build"
     pool:
-      name: "$(POOL)"
       vmImage: "ubuntu-latest"
     workspace:
       clean: all
+    variables:
+      ARTIFACTS_DIR: "/tmp/ripe-atlas-artifacts"
     timeoutInMinutes: 60
     
     strategy:
       matrix:
+        arm64:
+          ARCH: "arm64"
+          DOCKER_IMAGE_TAG: "latest-arm64"
+        armel:
+          ARCH: "armel"
+          DOCKER_IMAGE_TAG: "latest-armel"
+        armhf:
+          ARCH: "armhf"
+          DOCKER_IMAGE_TAG: "latest-armv7l"
+        i386:
+          ARCH: "i386"
+          DOCKER_IMAGE_TAG: "latest-i386"
         amd64:
           ARCH: "amd64"
-          DOCKER_IMAGE_TAG: "latest"
-          POOL: "Azure Pipelines"
-        armv7l:
-          ARCH: "armv7l"
-          DOCKER_IMAGE_TAG: "latest-armv7l"
-          POOL: "OtakuNeko ARM32"
-      maxParallel: 2
+          DOCKER_IMAGE_TAG: "latest-amd64"
+      maxParallel: 5
 
     steps:
     - checkout: self
@@ -56,33 +64,31 @@ jobs:
 
     - bash: |
         set -Eeuo pipefail
-        
-        docker stop watchtower || true
 
-        docker build --no-cache --rm=false -t ripe-atlas .
+        docker run --privileged --rm tonistiigi/binfmt --install=$(ARCH)
+
+        export DOCKER_BUILDKIT=1
+
+        docker build --platform=$(ARCH) --no-cache --rm=false -t ripe-atlas .
         docker images --digests ripe-atlas
 
-        BUILDER_IMAGE_ID=$(docker ps -a --format="{{.ID}}" --filter="label=image=ripe-atlas-builder" --filter="status=exited" --latest)
-        docker cp "$BUILDER_IMAGE_ID":/root /tmp
-        rm -rf /tmp/root/atlasswprobe-*-work
-        tar -cvzf ${BUILD_ARTIFACTSTAGINGDIRECTORY}/build-artifacts.tar.gz /tmp/root/atlasswprobe-*/
-        cp -r /tmp/root/atlasswprobe-*.deb ${BUILD_ARTIFACTSTAGINGDIRECTORY}
-      displayName: "Build image"
+        docker build --target=artifacts --platform=$(ARCH) --output=type=local,dest=$(ARTIFACTS_DIR) .
+        cp -r $(ARTIFACTS_DIR)/* ${BUILD_ARTIFACTSTAGINGDIRECTORY}
+      displayName: "build image and release artifacts"
 
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifact@1
       inputs:
-        pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+        targetPath: '$(Build.ArtifactStagingDirectory)'
         artifactName: '$(ARCH)'
         parallel: true
         parallelCount: 20
-
-    - task: Docker@1
-      displayName: "Docker login"
+    
+    - task: Docker@2
+      displayName: "docker login"
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
       inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: "Docker Hub: Jamesits"
-        command: login
+        containerRegistry: 'Docker Hub: Jamesits'
+        command: 'login'
 
     - bash: |
         set -Eeuo pipefail
@@ -91,22 +97,49 @@ jobs:
       displayName: "Push image"
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
 
-    - task: Docker@1
-      displayName: "Docker logout"
+    - task: Docker@2
+      displayName: "docker logout"
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
       inputs:
-        containerregistrytype: 'Container Registry'
-        dockerRegistryEndpoint: "Docker Hub: Jamesits"
-        command: logout
+        containerRegistry: 'Docker Hub: Jamesits'
+        command: 'logout'
+
+  - job: manifest
+    displayName: "create docker manifest"
+    pool:
+      vmImage: "ubuntu-latest"
+    workspace:
+      clean: all
+    variables:
+      DOCKER_IMAGE_TAG: "latest"
+    timeoutInMinutes: 60
+    dependsOn:
+      - build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), ne(variables['Build.Reason'], 'PullRequest'))
+
+    steps:
+    - task: Docker@2
+      displayName: "Docker login"
+      inputs:
+        containerRegistry: 'Docker Hub: Jamesits'
+        command: 'login'
 
     - bash: |
-        docker volume prune --force --filter "label=image=ripe-atlas-builder"
-        docker volume prune --force --filter "label=image=ripe-atlas"
-        
-        docker system prune --all --force --filter "label=image=ripe-atlas-builder"
-        docker system prune --all --force --filter "label=image=ripe-atlas"
-        
-        docker start watchtower || true
+        set -Eeuo pipefail
 
-      displayName: "Clean up"
+        docker manifest create \
+          $(DOCKER_IMAGE_BASENAME):$(DOCKER_IMAGE_TAG) \
+          --amend $(DOCKER_IMAGE_BASENAME):latest-arm64 \
+          --amend $(DOCKER_IMAGE_BASENAME):latest-armel \
+          --amend $(DOCKER_IMAGE_BASENAME):latest-armv7l \
+          --amend $(DOCKER_IMAGE_BASENAME):latest-i386 \
+          --amend $(DOCKER_IMAGE_BASENAME):latest-amd64
 
+          docker manifest push $(DOCKER_IMAGE_BASENAME):$(DOCKER_IMAGE_TAG)
+      displayName: "create and push manifest"
+
+    - task: Docker@2
+      displayName: "docker logout"
+      inputs:
+        containerRegistry: 'Docker Hub: Jamesits'
+        command: 'logout'

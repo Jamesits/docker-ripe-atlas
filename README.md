@@ -12,6 +12,17 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 * A Linux installation with Docker installed
 * Internet access
 
+## Tags
+
+The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas). Just use `latest` tag and Docker will select image variant automatically.
+
+* **`latest`: For all supported devices listed below (multi-arch)**
+* `latest-arm64`: For arm64 (aarch64) devices
+* `latest-armel`: For armv6l (armel) devices
+* `latest-armv7l`: For armv7l (armhf) devices
+* `latest-i386`: For i386 devices
+* `latest-amd64`: For amd64 devices
+
 ## Running
 
 First we start the container:

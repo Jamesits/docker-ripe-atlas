@@ -14,7 +14,7 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 
 ## Tags
 
-The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas). Just use `latest` tag and Docker will select image variant automatically.
+The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas). The `latest` tag supports [multi-arch](https://www.docker.com/blog/multi-arch-build-and-images-the-simple-way/), and should be used by default.
 
 * **`latest`: For all supported devices listed below (multi-arch)**
 * `latest-arm64`: For arm64 (aarch64) devices
@@ -41,14 +41,6 @@ docker run --detach --restart=always \
 	jamesits/ripe-atlas:latest
 ```
 
-Then we fetch the generated public key:
-
-```shell
-cat /var/atlas-probe/etc/probe_key.pub
-```
-
-[Register](https://atlas.ripe.net/apply/swprobe/) the probe with your public key. After the registration being manually processed, you'll see your new probe in your account.
-
 ### Using Docker Compose
 
 An example [`docker-compose.yaml`](/docker-compose.yaml) is provided. 
@@ -60,7 +52,19 @@ docker-compose pull
 docker-compose up -d
 ```
 
+## Registering the Probe
+
+Fetch the generated public key:
+
+```shell
+cat /var/atlas-probe/etc/probe_key.pub
+```
+
+[Register](https://atlas.ripe.net/apply/swprobe/) the probe with your public key. After the registration being manually processed, you'll see your new probe in your account.
+
 ## Building
+
+If you don't want to use the prebuilt image hosted on the Docker Hub, you can build your own image.
 
 ```shell
 DOCKER_BUILDKIT=1 docker build -t ripe-atlas .

@@ -1,27 +1,30 @@
 version: "2.0"
-volumes:
-  ripe_config:
-  ripe_status:
-  ripe_data:
+
 services:
-  ripe:
+  ripe-atlas:
     image: jamesits/ripe-atlas:latest
-    container_name: ripe
     restart: always
     environment:
       RXTXRPT: "yes"
-    tmpfs: /var/atlasdata
     volumes:
-        - "ripe_config:/var/atlas-probe/etc"
-        - "ripe_data:/var/atlas-probe/data"
-        - "ripe_status:/var/atlas-probe/status"
+      - "/var/atlas-probe/etc:/var/atlas-probe/etc"
+      - "/var/atlas-probe/status:/var/atlas-probe/status"
+    cap_drop:
+      - ALL
     cap_add:
-      - SYS_ADMIN
       - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
       - NET_RAW
-    hostname: ripe
     mem_limit: "64000000000"
     mem_reservation: 64m
     labels:
       - "traefik.enable=false"
       - "com.centurylinklabs.watchtower.enable=true"
+    logging:
+      driver: json-file
+      options:
+         max-size: 10m
+    # security_opt:
+    #   - seccomp:unconfined

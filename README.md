@@ -25,13 +25,15 @@ The following prebuilt tags are available at [Docker Hub](https://hub.docker.com
 
 ## Running
 
+### Using `docker run`
+
 First we start the container:
 
 ```shell
 docker run --detach --restart=always \
 	--log-driver json-file --log-opt max-size=10m \
 	--cpus=1 --memory=64m --memory-reservation=64m \
-	--cap-add=SYS_ADMIN --cap-add=NET_RAW --cap-add=CHOWN \
+	--cap-drop=ALL --cap-add=CHOWN --cap-add=SETUID --cap-add=SETGID --cap-add=DAC_OVERRIDE --cap-add=NET_RAW \
 	-v /var/atlas-probe/etc:/var/atlas-probe/etc \
 	-v /var/atlas-probe/status:/var/atlas-probe/status \
 	-e RXTXRPT=yes \
@@ -46,6 +48,18 @@ cat /var/atlas-probe/etc/probe_key.pub
 ```
 
 [Register](https://atlas.ripe.net/apply/swprobe/) the probe with your public key. After the registration being manually processed, you'll see your new probe in your account.
+
+### Using Docker Compose
+
+An example [`docker-compose.yaml`](/docker-compose.yaml) is provided. Note that the example config uses volumes instead of local directories. 
+
+## Building
+
+```shell
+DOCKER_BUILDKIT=1 docker build -t ripe-atlas .
+```
+
+Note that building this container image requires [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/).
 
 ## Caveats
 
@@ -102,6 +116,14 @@ Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.w
 
 All the config files are stored at `/var/atlas-probe`. Just backup it.
 
-### BuildKit
+### `sleep` command not working
 
-The `Dockerfile` requires [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/).
+On some systems, syscall `clock_nanosleep` and `clock_nanosleep_time64` are disabled by the default Docker seccomp. 
+
+Symptoms:
+- During container startup, `WARNING: clock_nanosleep or clock_nanosleep_time64 is not available on the system` is printed
+- Atlas software stops working after a while, printing logs like `sleep: cannot read realtime clock: Operation not permitted`
+
+Temporary workaround: 
+
+Add `--security-opt seccomp:unconfined` to the `docker run` commandline. 

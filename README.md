@@ -51,7 +51,14 @@ cat /var/atlas-probe/etc/probe_key.pub
 
 ### Using Docker Compose
 
-An example [`docker-compose.yaml`](/docker-compose.yaml) is provided. Note that the example config uses volumes instead of local directories. 
+An example [`docker-compose.yaml`](/docker-compose.yaml) is provided. 
+
+```shell
+git clone https://github.com/Jamesits/docker-ripe-atlas.git
+cd docker-ripe-atlas
+docker-compose pull
+docker-compose up -d
+```
 
 ## Building
 
@@ -118,7 +125,7 @@ All the config files are stored at `/var/atlas-probe`. Just backup it.
 
 ### `sleep` command not working
 
-On some systems, syscall `clock_nanosleep` and `clock_nanosleep_time64` are disabled by the default Docker seccomp. 
+On some systems, syscall `clock_nanosleep` and `clock_nanosleep_time64` are blocked by the default Docker seccomp. 
 
 Symptoms:
 - During container startup, `WARNING: clock_nanosleep or clock_nanosleep_time64 is not available on the system` is printed

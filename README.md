@@ -126,15 +126,3 @@ Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.w
 ### Backup
 
 All the config files are stored at `/var/atlas-probe`. Just backup it.
-
-### `sleep` command not working
-
-On some systems, syscall `clock_nanosleep` and `clock_nanosleep_time64` are blocked by the default Docker seccomp. 
-
-Symptoms:
-- During container startup, `WARNING: clock_nanosleep or clock_nanosleep_time64 is not available on the system` is printed
-- Atlas software stops working after a while, printing logs like `sleep: cannot read realtime clock: Operation not permitted`
-
-Temporary workaround: 
-
-Add `--security-opt seccomp:unconfined` to the `docker run` commandline. 

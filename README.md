@@ -76,9 +76,31 @@ Note that building this container image requires [BuildKit](https://docs.docker.
 
 ### IPv6
 
-Docker's IPv6 support is still [like shit](https://github.com/moby/moby/issues/25407). As a workaround, you can use IPv6 NAT using either `docker-ipv6nat` or native method (experimental).
+Docker does not enable IPv6 by default. If you want IPv6 support, some level of setup and a basic understanding of IPv6 is required. Swarm mode & some Kubernetes implementation supports IPv6 too with extra configuration.
 
-First, edit kernel parameters.
+#### Using native address assignment
+
+If you happened to have a block of static IPv6 addresses routed to your host, you can directly assign one of the addresses to the container. Edit `/etc/docker/daemon.json` and add native IPv6 address blocks, then restart the Docker daemon. An example:
+
+```json
+{
+  "ipv6": true,
+  "ip6tables": true,
+  "fixed-cidr-v6": "fd00:a1a3::/48"
+}
+```
+
+Notes:
+- These config work on Docker for Linux only
+- If `daemon.json` exists, merge the config lines instead of directly overwriting it; if it doesn't exist, create it manually
+- On some versions of Docker, you might also need to set `"experimental": true` for these options to work
+- For more info, see [the official doc](https://docs.docker.com/config/daemon/ipv6/)
+
+#### Using NAT (NPTv6)
+
+If your ISP does not conform to [BCOP 690](https://www.ripe.net/publications/docs/ripe-690) (very common), and/or your router cannot route smaller blocks of IPv6 to one server even if it has been assigned a block of valid IPv6 addresses (also very common), the method above might not work for you. As a workaround, you can setup NAT with `robbertkl/docker-ipv6nat` or similar projects. Manual iptables/nftables NAT setup is also possible, but *hanc marginis exiguitas non caperet*. 
+
+Firstly, edit kernel parameters to enable IPv6 routing. 
 
 ```shell
 cat > /etc/sysctl.d/50-docker-ipv6.conf <<EOF
@@ -89,29 +111,20 @@ EOF
 sysctl -p /etc/sysctl.d/50-docker-ipv6.conf
 ```
 
-Note this might break your network and your mileage may vary. You should swap `eth0` with your primary network adapter name, and if you use static IPv6 assignment instead of SLAAC, change `accept_ra` to `0`.
+Notes:
+- This potentially introduces more attack surface and might require you set up IPv6 firewall rules to make yourself safe
+- This might break your network and your mileage may vary
+- Swap `eth0` with your primary network adapter name
+- If you use static IPv6 assignment instead of SLAAC, change `accept_ra` to `0`
 
-#### Using robbertkl/docker-ipv6nat
+Secondly, create a IPv6 NAT enabled network.
 
 ```shell
 docker network create --ipv6 --subnet=fd00:a1a3::/48 ripe-atlas-network
 docker run -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro --cap-drop=ALL --cap-add=NET_RAW --cap-add=NET_ADMIN --cap-add=SYS_MODULE --net=host --name=ipv6nat robbertkl/ipv6nat:latest
 ```
 
-Then start the RIPE Atlas container with argument `--net=ripe-atlas-network`. 
-
-#### Using native method (experimental)
-
-Edit `/etc/docker/daemon.json`, then restart docker daemon.
-
-```json
-{
-  "experimental": true,
-  "ipv6": true,
-  "ip6tables": true,
-  "fixed-cidr-v6": "fd00:a1a3::/48"
-}
-```
+Finally, start the RIPE Atlas container with argument `--net=ripe-atlas-network`. 
 
 ### Auto Update
 

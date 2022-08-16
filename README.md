@@ -85,20 +85,18 @@ If you happened to have a block of static IPv6 addresses routed to your host, yo
 ```json
 {
   "ipv6": true,
-  "ip6tables": true,
-  "fixed-cidr-v6": "fd00:a1a3::/48"
+  "fixed-cidr-v6": "2001:db8:a1a3::/48"
 }
 ```
 
 Notes:
 - These config work on Docker for Linux only
 - If `daemon.json` exists, merge the config lines instead of directly overwriting it; if it doesn't exist, create it manually
-- On some versions of Docker, you might also need to set `"experimental": true` for these options to work
 - For more info, see [the official doc](https://docs.docker.com/config/daemon/ipv6/)
 
 #### Using NAT (NPTv6)
 
-If your ISP does not conform to [BCOP 690](https://www.ripe.net/publications/docs/ripe-690) (very common), and/or your router cannot route smaller blocks of IPv6 to one server even if it has been assigned a block of valid IPv6 addresses (also very common), the method above might not work for you. As a workaround, you can setup NAT with `robbertkl/docker-ipv6nat` or similar projects. Manual iptables/nftables NAT setup is also possible, but *hanc marginis exiguitas non caperet*. 
+If your ISP does not conform to [BCOP 690](https://www.ripe.net/publications/docs/ripe-690) (very common), and/or your router cannot route smaller blocks of IPv6 to one server even if it has been assigned a block of valid IPv6 addresses (also very common), the method above might not work for you. As a workaround, you can setup NAT with either [Docker's builtin experimental IPv6 NAT support](https://blog.iphoting.com/blog/2021/02/10/ipv6-docker-docker-compose-and-shorewall6-ip6tables/), `robbertkl/docker-ipv6nat` or similar projects. Manual iptables/nftables NAT setup is also possible, but *hanc marginis exiguitas non caperet*. 
 
 Firstly, edit kernel parameters to enable IPv6 routing. 
 

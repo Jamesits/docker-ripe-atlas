@@ -43,9 +43,6 @@ jobs:
         arm64:
           ARCH: "arm64"
           DOCKER_IMAGE_TAG: "latest-arm64"
-        armel:
-          ARCH: "armel"
-          DOCKER_IMAGE_TAG: "latest-armel"
         armhf:
           ARCH: "armhf"
           DOCKER_IMAGE_TAG: "latest-armv7l"
@@ -55,7 +52,7 @@ jobs:
         amd64:
           ARCH: "amd64"
           DOCKER_IMAGE_TAG: "latest-amd64"
-      maxParallel: 5
+      maxParallel: 4
 
     steps:
     - checkout: self
@@ -130,7 +127,6 @@ jobs:
         docker manifest create \
           $(DOCKER_IMAGE_BASENAME):$(DOCKER_IMAGE_TAG) \
           --amend $(DOCKER_IMAGE_BASENAME):latest-arm64 \
-          --amend $(DOCKER_IMAGE_BASENAME):latest-armel \
           --amend $(DOCKER_IMAGE_BASENAME):latest-armv7l \
           --amend $(DOCKER_IMAGE_BASENAME):latest-i386 \
           --amend $(DOCKER_IMAGE_BASENAME):latest-amd64

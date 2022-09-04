@@ -18,7 +18,6 @@ The following prebuilt tags are available at [Docker Hub](https://hub.docker.com
 
 * **`latest`: For all supported devices listed below (multi-arch)**
 * `latest-arm64`: For arm64 (aarch64) devices
-* `latest-armel`: For armv6l (armel) devices
 * `latest-armv7l`: For armv7l (armhf) devices
 * `latest-i386`: For i386 devices
 * `latest-amd64`: For amd64 devices

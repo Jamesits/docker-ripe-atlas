@@ -11,7 +11,6 @@ WORKDIR /root
 RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
 		case ${TARGETPLATFORM} in \
 			"linux/arm64")	echo 'export CROSSBUILD_ARCH=arm64 CROSS_COMPILE_TARGET=aarch64-linux-gnu' > env ;; \
-			"linux/arm/v6")	echo 'export CROSSBUILD_ARCH=armel CROSS_COMPILE_TARGET=arm-linux-gnueabi' > env ;; \
 			"linux/arm/v7")	echo 'export CROSSBUILD_ARCH=armhf CROSS_COMPILE_TARGET=arm-linux-gnueabihf' > env ;; \
 			"linux/386")	echo 'export CROSSBUILD_ARCH=i386 CROSS_COMPILE_TARGET=i686-linux-gnu' > env ;; \
 			"linux/amd64")	echo 'export CROSSBUILD_ARCH=amd64 CROSS_COMPILE_TARGET=x86_64-linux-gnu' > env ;; \

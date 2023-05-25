@@ -16,8 +16,8 @@ export ATLAS_GID="${ATLAS_GID:-999}"
 
 usermod -u $ATLAS_UID atlas
 groupmod -g $ATLAS_GID atlas
-chown -R atlas:atlas /var/atlas-probe
-chown -R atlas:atlas /var/atlasdata
+chown -R atlas:atlas /var/atlas-probe || true
+chown -R atlas:atlas /var/atlasdata || true
 
 # create essential files and fix permission
 mkdir -p /var/atlas-probe/status

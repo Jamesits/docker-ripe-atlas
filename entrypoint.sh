@@ -21,11 +21,11 @@ chown -R atlas:atlas /var/atlasdata
 
 # create essential files and fix permission
 mkdir -p /var/atlas-probe/status
-chown -R atlas:atlas /var/atlas-probe/status
+chown -R atlas:atlas /var/atlas-probe/status || true
 mkdir -p /var/atlas-probe/etc
-chown -R atlas:atlas /var/atlas-probe/etc
+chown -R atlas:atlas /var/atlas-probe/etc || true
 mkdir -p /var/atlas-probe/state
-chown -R atlas:atlas /var/atlas-probe/state
+chown -R atlas:atlas /var/atlas-probe/state || true
 echo "CHECK_ATLASDATA_TMPFS=no" > "${CONFIG_FILE}"
 
 # set probe configuration

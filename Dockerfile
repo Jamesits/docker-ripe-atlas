@@ -41,7 +41,7 @@ LABEL image="ripe-atlas-artifacts"
 COPY --from=builder /root/atlasswprobe-*.deb /
 
 ## the actual image
-FROM debian:stable-slim
+FROM debian:10-slim
 LABEL maintainer="dockerhub@public.swineson.me"
 LABEL image="ripe-atlas"
 ARG DEBIAN_FRONTEND=noninteractive
@@ -55,7 +55,7 @@ RUN ln -s /bin/true /bin/systemctl \
 	&& groupadd --force --system --gid $ATLAS_GID atlas \
 	&& usermod -aG atlas atlas \
 	&& apt-get update -y \
-	&& apt-get install -y libcap2-bin libssl1.1 iproute2 openssh-client procps net-tools gosu \
+	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools gosu \
 	&& dpkg -i /tmp/atlasswprobe-*.deb \
 	&& apt-get install -fy \
 	&& rm -rf /var/lib/apt/lists/* \

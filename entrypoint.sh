@@ -38,6 +38,4 @@ for OPT in "${OPTIONS[@]}"; do
 	fi
 done
 
-export ATLAS_STATIC="/usr/local/atlas"
-
 exec gosu atlas:atlas "$@"

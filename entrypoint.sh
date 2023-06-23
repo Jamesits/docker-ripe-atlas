@@ -4,6 +4,8 @@ set -Eeuo pipefail
 CONFIG_FILE="/var/atlas-probe/state/config.txt"
 declare -a OPTIONS=(
 	"RXTXRPT"
+	"HTTP_POST_PORT"
+	"TELNETD_PORT"
 )
 
 # test essential syscalls
@@ -35,5 +37,7 @@ for OPT in "${OPTIONS[@]}"; do
 		echo "${OPT}=${!OPT}" >> "${CONFIG_FILE}"
 	fi
 done
+
+export ATLAS_STATIC="/usr/local/atlas"
 
 exec gosu atlas:atlas "$@"

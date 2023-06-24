@@ -24,5 +24,6 @@ services:
       driver: json-file
       options:
          max-size: 10m
+    # network_mode: "host" # if possible, avoid double NAT
     # security_opt:
     #   - seccomp:unconfined

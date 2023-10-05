@@ -1,5 +1,5 @@
 ## builder
-FROM --platform=$BUILDPLATFORM debian:10-slim as builder
+FROM --platform=$BUILDPLATFORM debian:12-slim as builder
 LABEL image="ripe-atlas-builder"
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM

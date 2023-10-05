@@ -1,5 +1,3 @@
-version: "2.0"
-
 services:
   ripe-atlas:
     image: jamesits/ripe-atlas:latest
@@ -26,5 +24,6 @@ services:
       driver: json-file
       options:
          max-size: 10m
+    # network_mode: "host" # if possible, avoid double NAT
     # security_opt:
     #   - seccomp:unconfined

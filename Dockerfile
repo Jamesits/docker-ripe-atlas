@@ -50,6 +50,8 @@ COPY --from=builder /root/atlasswprobe-*.deb /tmp
 
 ARG ATLAS_UID=101
 ARG ATLAS_GID=999
+ENV ATLAS_UID=$ATLAS_UID
+ENV ATLAS_GID=$ATLAS_GID
 RUN ln -s /bin/true /bin/systemctl \
 	&& adduser --system --uid $ATLAS_UID atlas \
 	&& groupadd --force --system --gid $ATLAS_GID atlas \

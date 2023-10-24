@@ -81,6 +81,17 @@ If you don't want to use the prebuilt image hosted on the Docker Hub, you can bu
 ```shell
 DOCKER_BUILDKIT=1 docker build -t ripe-atlas .
 ```
+Optionally you can build the image with custom id's for the atlas user and/or group
+```shell
+DOCKER_BUILDKIT=1 docker build -t ripe-atlas --build-arg="ATLAS_UID=1234" --build-arg="ATLAS_GID=1234" .
+```
+```shell
+DOCKER_BUILDKIT=1 docker build -t ripe-atlas --build-arg="ATLAS_UID=1234" .
+```
+```shell
+DOCKER_BUILDKIT=1 docker build -t ripe-atlas --build-arg="ATLAS_GID=1234" .
+```
+
 
 Note that building this container image requires [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/).
 

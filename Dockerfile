@@ -55,7 +55,7 @@ RUN ln -s /bin/true /bin/systemctl \
 	&& groupadd --force --system --gid $ATLAS_GID atlas \
 	&& usermod -aG atlas atlas \
 	&& apt-get update -y \
-	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools \
+	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools tini \
 	&& dpkg -i /tmp/atlasswprobe-*.deb \
 	&& apt-get install -fy \
 	&& rm -rf /var/lib/apt/lists/* \
@@ -72,5 +72,5 @@ RUN chmod +x /usr/local/bin/* \
 WORKDIR /var/atlas-probe
 VOLUME [ "/var/atlas-probe/etc", "/var/atlas-probe/status" ]
 
-ENTRYPOINT [ "entrypoint.sh" ]
+ENTRYPOINT [ "tini", "--", "entrypoint.sh" ]
 CMD [ "atlas" ]

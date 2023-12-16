@@ -55,7 +55,7 @@ RUN ln -s /bin/true /bin/systemctl \
 	&& groupadd --force --system --gid $ATLAS_GID atlas \
 	&& usermod -aG atlas atlas \
 	&& apt-get update -y \
-	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools gosu \
+	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools \
 	&& dpkg -i /tmp/atlasswprobe-*.deb \
 	&& apt-get install -fy \
 	&& rm -rf /var/lib/apt/lists/* \

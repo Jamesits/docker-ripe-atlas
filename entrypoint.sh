@@ -38,4 +38,4 @@ for OPT in "${OPTIONS[@]}"; do
 	fi
 done
 
-exec gosu atlas:atlas "$@"
+exec setpriv --reuid=$ATLAS_UID --regid=$ATLAS_GID --init-groups "$@"

@@ -1,5 +1,5 @@
 ## builder
-FROM --platform=$BUILDPLATFORM debian:10-slim as builder
+FROM --platform=$BUILDPLATFORM debian:11-slim as builder
 LABEL image="ripe-atlas-builder"
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
@@ -41,7 +41,7 @@ LABEL image="ripe-atlas-artifacts"
 COPY --from=builder /root/atlasswprobe-*.deb /
 
 ## the actual image
-FROM debian:10-slim
+FROM debian:11-slim
 LABEL maintainer="dockerhub@public.swineson.me"
 LABEL image="ripe-atlas"
 ARG DEBIAN_FRONTEND=noninteractive

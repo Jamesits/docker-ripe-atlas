@@ -75,7 +75,9 @@ Note that building this container image requires [BuildKit](https://docs.docker.
 
 ### IPv6
 
-Docker does not enable IPv6 by default. If you want IPv6 support, some level of setup and a basic understanding of IPv6 is required. Swarm mode & some Kubernetes implementation supports IPv6 too with extra configuration.
+[Docker 27.0.1](https://github.com/moby/moby/releases/tag/v27.0.1) enabled IPv6 (incl. `ip6tables` and NATv6) by default.
+
+If you are on older versions: Docker does not enable IPv6 by default. If you want IPv6 support, some level of setup and a basic understanding of IPv6 is required. Swarm mode & some Kubernetes implementation supports IPv6 too with extra configuration.
 
 #### Using native address assignment
 

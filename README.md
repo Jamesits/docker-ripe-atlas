@@ -136,3 +136,7 @@ Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.w
 ### Backup
 
 All the config files are stored at `/var/atlas-probe`. Just backup it.
+
+### Running under Debian 10
+
+When the host distro is Debian 10 or similarly old ones, you might need to add `--security-opt tseccomp:unconfined` to the `docker run` command to make things work. We don't recommend using EOL'ed distros.

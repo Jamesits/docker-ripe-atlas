@@ -42,7 +42,7 @@ COPY --from=builder /root/atlasswprobe-*.deb /
 
 ## the actual image
 FROM debian:11-slim
-LABEL maintainer="dockerhub@public.swineson.me"
+LABEL org.opencontainers.image.authors="dockerhub@public.swineson.me"
 LABEL image="ripe-atlas"
 ARG DEBIAN_FRONTEND=noninteractive
 

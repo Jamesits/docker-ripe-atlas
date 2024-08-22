@@ -35,7 +35,7 @@ RUN git submodule update
 RUN sed -i 's/libssl1,/libssl1.1,/g' ./debian/control
 
 RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
-		. ./env; \
+		. ../env; \
 	fi \
 	&& dpkg-buildpackage -b -us -uc --host-arch=$CROSSBUILD_ARCH
 

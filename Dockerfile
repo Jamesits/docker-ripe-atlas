@@ -1,5 +1,5 @@
 ## builder
-FROM --platform=$BUILDPLATFORM debian:11-slim as builder
+FROM --platform=$BUILDPLATFORM debian:11-slim AS builder
 LABEL image="ripe-atlas-builder"
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
@@ -10,19 +10,19 @@ WORKDIR /root
 
 RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
 		case ${TARGETPLATFORM} in \
-			"linux/arm64")	echo 'export CROSSBUILD_ARCH=arm64 CROSS_COMPILE_TARGET=aarch64-linux-gnu' > env ;; \
-			"linux/arm/v7")	echo 'export CROSSBUILD_ARCH=armhf CROSS_COMPILE_TARGET=arm-linux-gnueabihf' > env ;; \
-			"linux/386")	echo 'export CROSSBUILD_ARCH=i386 CROSS_COMPILE_TARGET=i686-linux-gnu' > env ;; \
-			"linux/amd64")	echo 'export CROSSBUILD_ARCH=amd64 CROSS_COMPILE_TARGET=x86_64-linux-gnu' > env ;; \
+			"linux/arm64")	echo 'export CROSSBUILD_ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-' > env ;; \
+			"linux/arm/v7")	echo 'export CROSSBUILD_ARCH=armhf CROSS_COMPILE=arm-linux-gnueabihf-' > env ;; \
+			"linux/386")	echo 'export CROSSBUILD_ARCH=i386 CROSS_COMPILE=i686-linux-gnu-' > env ;; \
+			"linux/amd64")	echo 'export CROSSBUILD_ARCH=amd64 CROSS_COMPILE=x86_64-linux-gnu-' > env ;; \
 			*) echo "Unsupported platform"; exit 1 ;; \
 		esac \
 		&& . ./env \
 		&& dpkg --add-architecture $CROSSBUILD_ARCH \
-		&& apt-get update -y \
-		&& apt-get install -y libssl-dev:$CROSSBUILD_ARCH crossbuild-essential-$CROSSBUILD_ARCH; \
+		&& apt update -y \
+		&& apt install -y libssl-dev:$CROSSBUILD_ARCH crossbuild-essential-$CROSSBUILD_ARCH; \
 	fi \
-	&& apt-get update -y \
-	&& apt-get install -y git tar fakeroot libssl-dev libcap2-bin autoconf automake libtool build-essential
+	&& apt update -y \
+	&& apt install -y git build-essential debhelper libssl-dev
 
 RUN git clone --recursive "$GIT_URL"
 
@@ -30,53 +30,50 @@ RUN git clone --recursive "$GIT_URL"
 WORKDIR /root/ripe-atlas-software-probe
 RUN git checkout 67b0736887d33d1c42557e7c7694cbd4e5d8e6ee .
 RUN git submodule update
-WORKDIR /root
+
+# Temporary workaround for Debian libssl1.1 dependency issue
+RUN sed -i 's/libssl1,/libssl1.1,/g' ./debian/control
 
 RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
-		. ./env \
-		&& export CROSS_COMPILE="$CROSS_COMPILE_TARGET-" \
-		&& sed -i 's/.\/configure/.\/configure --host='$CROSS_COMPILE_TARGET'/g' ./ripe-atlas-software-probe/build-config/debian/bin/make-deb \
-		&& sed -i 's/ARCH=$(get_arch)/ARCH='$CROSSBUILD_ARCH'/g' ./ripe-atlas-software-probe/build-config/debian/bin/make-deb; \
+		. ./env; \
 	fi \
-	&& ./ripe-atlas-software-probe/build-config/debian/bin/make-deb
+	&& dpkg-buildpackage -b -us -uc --host-arch=$CROSSBUILD_ARCH
 
 ## artifacts
 FROM scratch AS artifacts
 LABEL image="ripe-atlas-artifacts"
 
-COPY --from=builder /root/atlasswprobe-*.deb /
+COPY --from=builder /root/ripe-atlas-common*.deb /root/ripe-atlas-probe*.deb /
 
 ## the actual image
 FROM debian:11-slim
 LABEL org.opencontainers.image.authors="dockerhub@public.swineson.me"
-LABEL image="ripe-atlas"
+LABEL org.opencontainers.image.title="ripe-atlas"
 ARG DEBIAN_FRONTEND=noninteractive
 
-COPY --from=builder /root/atlasswprobe-*.deb /tmp
+COPY --from=builder /root/ripe-atlas-common*.deb /root/ripe-atlas-probe*.deb /tmp/
 
 ARG ATLAS_UID=101
+ARG ATLAS_MEAS_UID=102
 ARG ATLAS_GID=999
 RUN ln -s /bin/true /bin/systemctl \
-	&& adduser --system --uid $ATLAS_UID atlas \
-	&& groupadd --force --system --gid $ATLAS_GID atlas \
-	&& usermod -aG atlas atlas \
+	&& adduser --system --uid $ATLAS_UID ripe-atlas \
+	&& adduser --system --uid $ATLAS_MEAS_UID ripe-atlas-measurement \
+	&& groupadd --force --system --gid $ATLAS_GID ripe-atlas \
+	&& usermod -aG ripe-atlas ripe-atlas \
+	&& usermod -aG ripe-atlas ripe-atlas-measurement \
 	&& apt-get update -y \
 	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools tini \
-	&& dpkg -i /tmp/atlasswprobe-*.deb \
+	&& dpkg -i /tmp/ripe-atlas*.deb \
 	&& apt-get install -fy \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& rm -f /tmp/atlasswprobe-*.deb \
-	&& ln -s /usr/local/atlas/bin/ATLAS /usr/local/bin/atlas
+	&& rm -f /tmp/ripe-atlas*.deb
 
 COPY entrypoint.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/* \
-	&& chown -R atlas:atlas /var/atlas-probe \
-	&& mkdir -p /var/atlasdata \
-	&& chown -R atlas:atlas /var/atlasdata \
-	&& chmod 777 /var/atlasdata
+RUN chmod +x /usr/local/bin/*
 
-WORKDIR /var/atlas-probe
-VOLUME [ "/var/atlas-probe/etc", "/var/atlas-probe/status" ]
+WORKDIR /etc/ripe-atlas
+VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas/status" ]
 
 ENTRYPOINT [ "tini", "--", "entrypoint.sh" ]
-CMD [ "atlas" ]
+CMD [ "ripe-atlas" ]

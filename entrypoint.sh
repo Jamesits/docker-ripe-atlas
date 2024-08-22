@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-CONFIG_FILE="/var/atlas-probe/state/config.txt"
+CONFIG_FILE="/etc/ripe-atlas/config.txt"
 declare -a OPTIONS=(
 	"RXTXRPT"
 	"HTTP_POST_PORT"
@@ -14,21 +14,23 @@ if ! sleep 0 >/dev/null 2>&1; then
 fi
 
 export ATLAS_UID="${ATLAS_UID:-101}"
+export ATLAS_MEAS_UID="${ATLAS_MEAS_UID:-102}"
 export ATLAS_GID="${ATLAS_GID:-999}"
 
-usermod -u $ATLAS_UID atlas
-groupmod -g $ATLAS_GID atlas
-chown -R atlas:atlas /var/atlas-probe || true
-chown -R atlas:atlas /var/atlasdata || true
+usermod -u $ATLAS_UID ripe-atlas
+usermod -u $ATLAS_MEAS_UID ripe-atlas-measurement
+groupmod -g $ATLAS_GID ripe-atlas
 
 # create essential files and fix permission
-mkdir -p /var/atlas-probe/status
-chown -R atlas:atlas /var/atlas-probe/status || true
-mkdir -p /var/atlas-probe/etc
-chown -R atlas:atlas /var/atlas-probe/etc || true
-mkdir -p /var/atlas-probe/state
-chown -R atlas:atlas /var/atlas-probe/state || true
+mkdir -p /run/ripe-atlas
+chmod -R 775 /run/ripe-atlas || true
+chown -R ripe-atlas:ripe-atlas /run/ripe-atlas || true
+mkdir -p /var/spool/ripe-atlas
+chown -R ripe-atlas:ripe-atlas /var/spool/ripe-atlas || true
+mkdir -p /etc/ripe-atlas
 echo "CHECK_ATLASDATA_TMPFS=no" > "${CONFIG_FILE}"
+echo "prod" > "/etc/ripe-atlas/mode"
+chown -R ripe-atlas:ripe-atlas /etc/ripe-atlas || true
 
 # set probe configuration
 for OPT in "${OPTIONS[@]}"; do

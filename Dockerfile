@@ -26,6 +26,12 @@ RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
 
 RUN git clone --recursive "$GIT_URL"
 
+# Revert to 5080, 5090 needs further testing
+WORKDIR /root/ripe-atlas-software-probe
+RUN git checkout 67b0736887d33d1c42557e7c7694cbd4e5d8e6ee .
+RUN git submodule update
+WORKDIR /root
+
 RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
 		. ./env \
 		&& export CROSS_COMPILE="$CROSS_COMPILE_TARGET-" \

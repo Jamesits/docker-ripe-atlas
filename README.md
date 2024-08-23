@@ -36,8 +36,21 @@ docker run --detach --restart=always \
 	-v /var/atlas-probe/etc:/var/atlas-probe/etc \
 	-v /var/atlas-probe/status:/var/atlas-probe/status \
 	-e RXTXRPT=yes \
+	-e ATLAS_UID=1000 `#optional to map the container's internal user to an user on the host machine. ` \
+  	-e ATLAS_GID=1000 `#optional to map the container's internal group to a group on the host machine.` \
 	--name ripe-atlas --hostname "$(hostname --fqdn)" \
 	jamesits/ripe-atlas:latest
+```
+### ATLAS_UID and ATLAS_GID
+
+In this example we used ATLAS_UID=1000 and ATLAS_GID=1000, to find the id's of the user on your host use id user_you_want_to_use as below on your host
+
+```shell
+id user_you_want_to_use
+```
+The output will be like 
+```shell
+uid=<id>(user_you_want_to_use) gid=<id>(user_you_want_to_use)
 ```
 
 ### Using Docker Compose
@@ -68,6 +81,17 @@ If you don't want to use the prebuilt image hosted on the Docker Hub, you can bu
 ```shell
 DOCKER_BUILDKIT=1 docker build -t ripe-atlas .
 ```
+Optionally you can build the image with custom id's for the atlas user and/or group
+```shell
+DOCKER_BUILDKIT=1 docker build -t ripe-atlas --build-arg="ATLAS_UID=1234" --build-arg="ATLAS_GID=1234" .
+```
+```shell
+DOCKER_BUILDKIT=1 docker build -t ripe-atlas --build-arg="ATLAS_UID=1234" .
+```
+```shell
+DOCKER_BUILDKIT=1 docker build -t ripe-atlas --build-arg="ATLAS_GID=1234" .
+```
+
 
 Note that building this container image requires [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/).
 

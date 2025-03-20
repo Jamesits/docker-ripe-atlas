@@ -52,9 +52,10 @@ RUN apt-get update -y \
 
 COPY --chown=0:0 rootfs_overrides/. /
 
-RUN cp -rv /etc/ripe-atlas/. /usr/share/factory/etc/ripe-atlas/ \
-	&& cp -rv /run/ripe-atlas/. /usr/share/factory/run/ripe-atlas/ \
-	&& cp -rv /var/spool/ripe-atlas/. /usr/share/factory/var/spool/ripe-atlas/
+RUN mkdir -p /usr/share/factory/etc /usr/share/factory/run /usr/share/factory/var/spool \
+	&& cp -rpv /etc/ripe-atlas /usr/share/factory/etc/ripe-atlas \
+	&& cp -rpv /run/ripe-atlas /usr/share/factory/run/ripe-atlas \
+	&& cp -rpv /var/spool/ripe-atlas /usr/share/factory/var/spool/ripe-atlas
 
 WORKDIR /run/ripe-atlas
 VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas", "/var/spool/ripe-atlas" ]

@@ -42,7 +42,7 @@ for OPT in "${OPTIONS[@]}"; do
 done
 
 if [ "$1" = "ripe-atlas" ]; then
-	exec setpriv --reuid=$ATLAS_UID --regid=$ATLAS_GID --init-groups "$@"
+	exec setpriv --reuid="$(id -u ripe-atlas)" --regid="$(id -g ripe-atlas-measurement)" --init-groups -- "$@"
 else
 	exec "$@"
 fi

@@ -11,7 +11,7 @@ group "default" {
 
 target "_default" {
     dockerfile = "Dockerfile"
-    platforms = ["linux/amd64"]
+    platforms = ["linux/386", "linux/amd64", "linux/arm/v7", "linux/arm64"]
     args = {
         BUILDKIT_SYNTAX = "${CR_DOCKER_HUB_PREFIX}/docker/dockerfile:1"
     }

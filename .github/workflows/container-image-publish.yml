@@ -49,3 +49,10 @@ jobs:
             docker-bake.hcl
             cwd://${{ steps.metadata-probe.outputs.bake-file }}
             cwd://${{ steps.metadata-anchor.outputs.bake-file }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "deb"
+          path: |
+            output/
+          retention-days: 3
+          compression-level: 0

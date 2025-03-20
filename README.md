@@ -2,9 +2,13 @@
 
 This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-probe/) packaged as a Docker image.
 
-[![Build Status](https://dev.azure.com/nekomimiswitch/General/_apis/build/status/docker-ripe-atlas?branchName=master)](https://dev.azure.com/nekomimiswitch/General/_build/latest?definitionId=83&branchName=master)
+![Works - On My Machine](https://img.shields.io/badge/Works-On_My_Machine-2ea44f)
+![Project Status - Feature Complete](https://img.shields.io/badge/Project_Status-Feature_Complete-2ea44f)
+[![Docker Image Version](https://img.shields.io/docker/v/jamesits/ripe-atlas?label=Docker%20Hub&sort=semver)](http://hub.docker.com/r/jamesits/ripe-atlas)
 
-## Requirements
+## Usage
+
+### Requirements
 
 * 1 CPU core (of course)
 * 20MiB memory
@@ -12,19 +16,19 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 * A Linux installation with Docker installed
 * Internet access
 
-## Tags
+### Tags
 
-The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas). The `latest` tag supports [multi-arch](https://www.docker.com/blog/multi-arch-build-and-images-the-simple-way/), and should be used by default.
+The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas):
 
-* **`latest`: For all supported devices listed below (multi-arch)**
-* `latest-arm64`: For arm64 (aarch64) devices
-* `latest-armv7l`: For armv7l (armhf) devices
-* `latest-i386`: For i386 devices
-* `latest-amd64`: For amd64 devices
+- `latest`, `latest-probe`, `latest-anchor`: latest stable version
+- `{version}`, `{version}-probe`, `{version}-anchor`: matches upstream version
+- `edge`, `edge-probe`, `edge-anchor`: whatever from the master branch
 
-## Running
+Since version 5090, we do not provide `-{arch}` tags anymore.
 
-### Using `docker run`
+### Running
+
+#### Using `docker run`
 
 First we start the container:
 
@@ -37,12 +41,12 @@ docker run --detach --restart=always \
 	-v /run/ripe-atlas/status:/run/ripe-atlas/status \
 	-e RXTXRPT=yes \
 	--name ripe-atlas --hostname "$(hostname --fqdn)" \
-	jamesits/ripe-atlas:latest
+	docker.io/jamesits/ripe-atlas:latest
 ```
 
-### Using Docker Compose
+#### Using Docker Compose
 
-An example [`docker-compose.yaml`](/docker-compose.yaml) is provided. 
+An example [`docker-compose.yaml`](/docker-compose.yaml) is provided.
 
 ```shell
 git clone https://github.com/Jamesits/docker-ripe-atlas.git
@@ -51,7 +55,7 @@ docker-compose pull
 docker-compose up -d
 ```
 
-## Registering the Probe
+### Registering the Probe
 
 Fetch the generated public key:
 
@@ -97,9 +101,9 @@ Notes:
 
 #### Using NAT (NPTv6)
 
-If your ISP does not conform to [BCOP 690](https://www.ripe.net/publications/docs/ripe-690) (very common), and/or your router cannot route smaller blocks of IPv6 to one server even if it has been assigned a block of valid IPv6 addresses (also very common), the method above might not work for you. As a workaround, you can setup NAT with either [Docker's builtin experimental IPv6 NAT support](https://blog.iphoting.com/blog/2021/02/10/ipv6-docker-docker-compose-and-shorewall6-ip6tables/), `robbertkl/docker-ipv6nat` or similar projects. Manual iptables/nftables NAT setup is also possible, but *hanc marginis exiguitas non caperet*. 
+If your ISP does not conform to [BCOP 690](https://www.ripe.net/publications/docs/ripe-690) (very common), and/or your router cannot route smaller blocks of IPv6 to one server even if it has been assigned a block of valid IPv6 addresses (also very common), the method above might not work for you. As a workaround, you can setup NAT with either [Docker's builtin experimental IPv6 NAT support](https://blog.iphoting.com/blog/2021/02/10/ipv6-docker-docker-compose-and-shorewall6-ip6tables/), `robbertkl/docker-ipv6nat` or similar projects. Manual iptables/nftables NAT setup is also possible, but *hanc marginis exiguitas non caperet*.
 
-Firstly, edit kernel parameters to enable IPv6 routing. 
+Firstly, edit kernel parameters to enable IPv6 routing.
 
 ```shell
 cat > /etc/sysctl.d/50-docker-ipv6.conf <<EOF
@@ -123,7 +127,7 @@ docker network create --ipv6 --subnet=fd00:a1a3::/48 ripe-atlas-network
 docker run -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro --cap-drop=ALL --cap-add=NET_RAW --cap-add=NET_ADMIN --cap-add=SYS_MODULE --net=host --name=ipv6nat robbertkl/ipv6nat:latest
 ```
 
-Finally, start the RIPE Atlas container with argument `--net=ripe-atlas-network`. 
+Finally, start the RIPE Atlas container with argument `--net=ripe-atlas-network`.
 
 ### Auto Update
 
@@ -137,7 +141,7 @@ Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.w
 
 ### Backup
 
-All the config files are stored at `/var/atlas-probe`. Just backup it.
+Just backup the mounted directories.
 
 ### Running under Debian 10
 

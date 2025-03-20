@@ -27,6 +27,9 @@ function init_dir() {
 		>&2 printf "[entrypoint.sh]: Initializing directory %s\n" "$1"
 		mkdir -p -- "$1"
 		cp -rpv -- "/usr/share/factory/$1/." "$1"
+	else
+		# try to copy missing files only, but do not overwrite existing files
+		cp -rpnv -- "/usr/share/factory/$1/." "$1"
 	fi
 	chmod "$2" -- "$1" || true
 	chown "$3:$4" -- "$1" || true

@@ -39,7 +39,7 @@ COPY --link --from=builder /root/*.deb /
 ######## Release: ripe-atlas-anchor ########
 FROM base as ripe-atlas-anchor
 
-COPY --link --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-anchor_*.deb /tmp/
+COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-anchor_*.deb /tmp/
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y \
 	&& apt install -fy /tmp/ripe-atlas*.deb \
@@ -54,13 +54,13 @@ CMD [ "ripe-atlas" ]
 ######## Release: ripe-atlas-probe ########
 FROM base as ripe-atlas-probe
 
-COPY --link --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-probe_*.deb /tmp/
+COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-probe_*.deb /tmp/
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y \
 	&& apt install -fy /tmp/ripe-atlas-*.deb \
 	&& rm -rf /var/lib/apt/lists/* /tmp/*.deb
 
-COPY --link --chown=0:0 rootfs_overrides/. /
+COPY --chown=0:0 rootfs_overrides/. /
 WORKDIR /run/ripe-atlas
 VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas/status" ]
 ENTRYPOINT [ "tini", "--", "entrypoint.sh" ]

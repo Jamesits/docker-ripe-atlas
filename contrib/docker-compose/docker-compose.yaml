@@ -12,11 +12,14 @@ services:
       - ALL
     cap_add:
       - NET_RAW
+      # required for tini
+      - KILL
       # required for `setpriv` to work
       - SETUID
       - SETGID
       # required for auto-fixing the permissions of the directories
       - CHOWN
+      - FOWNER
       - DAC_OVERRIDE
     mem_limit: "64000000000"
     mem_reservation: 64m

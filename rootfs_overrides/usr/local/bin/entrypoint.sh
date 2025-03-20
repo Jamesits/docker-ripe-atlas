@@ -22,15 +22,21 @@ if [ -d "/var/atlas-probe" ]; then
 fi
 
 # create essential directories and try to fix their permissions
-chmod 775 -- /run/ripe-atlas || true
-chown ripe-atlas-measurement:ripe-atlas -- /run/ripe-atlas || true
-chmod 2775 -- /var/spool/ripe-atlas || true
-chown ripe-atlas:ripe-atlas -- /var/spool/ripe-atlas || true
-chmod 755 -- /etc/ripe-atlas || true
-chown ripe-atlas:ripe-atlas -- /etc/ripe-atlas || true
+function init_dir() {
+	if [ -z "$( ls -A "$1" )" ]; then
+		>&2 printf "[entrypoint.sh]: Initializing directory %s\n" "$1"
+		mkdir -p -- "$1"
+		cp -rpv -- "/usr/share/factory/$1/." "$1"
+	fi
+	chmod "$2" -- "$1" || true
+	chown "$3:$4" -- "$1" || true
+}
+init_dir "/run/ripe-atlas" "775" "ripe-atlas-measurement" "ripe-atlas"
+init_dir "/var/spool/ripe-atlas" "2775" "ripe-atlas" "ripe-atlas"
+init_dir "/etc/ripe-atlas" "755" "ripe-atlas" "ripe-atlas"
 
 # set probe configuration
-printf "prod\n" > "/etc/ripe-atlas/mode"
+printf "prod\n" > "/etc/ripe-atlas/mode.atlasswprobe"
 printf "CHECK_ATLASDATA_TMPFS=no\n" > "${CONFIG_FILE}"
 for OPT in "${OPTIONS[@]}"; do
 	if [ ! -z "${!OPT+x}" ]; then

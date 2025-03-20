@@ -7,10 +7,13 @@ Image=docker.io/jamesits/ripe-atlas:latest
 Memory=256m
 DropCapability=ALL
 AddCapability=NET_RAW
+# required for tini
+AddCapability=KILL
 # required for `setpriv` to work
 AddCapability=SETUID
 AddCapability=SETGID
 # required for auto-fixing the permissions of the directories
+AddCapability=FOWNER
 AddCapability=CHOWN
 AddCapability=DAC_OVERRIDE
 

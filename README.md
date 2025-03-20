@@ -143,13 +143,13 @@ Upstream software does not correctly use Linux [capabilities(7)](https://man7.or
 | Container Runtime | Container User | Network Namespace | Works | Caveats                                  |
 |-------------------|----------------|-------------------|-------|------------------------------------------|
 | root              | root           | separate          | YES   |                                          |
-| root              | non-root       | separate          | ?     | set `ENTRYPOINT_DO_NOT_SET_USER=1`       |
+| root              | non-root       | separate          | NO    | daemons does not start                   |
 | root              | root           | host              | ?     |                                          |
-| root              | non-root       | host              | ?     | set `ENTRYPOINT_DO_NOT_SET_USER=1`       |
-| rootless          | root           | separate          | YES   |                                          |
-| rootless          | non-root       | separate          | ?     | set `ENTRYPOINT_DO_NOT_SET_USER=1`       |
+| root              | non-root       | host              | NO    | daemons does not start                   |
+| rootless          | root           | separate          | YES   | traceroute might not work                |
+| rootless          | non-root       | separate          | NO    | daemons does not start                   |
 | rootless          | root           | host              | NO    | `eooqd: socket: Operation not permitted` |
-| rootless          | non-root       | host              | ?     | set `ENTRYPOINT_DO_NOT_SET_USER=1`       |
+| rootless          | non-root       | host              | NO    | daemons does not start                   |
 
 When the host distro is Debian 10 or similarly old ones, you might need to add `--security-opt seccomp:unconfined` to the `docker run` command to make things work ([#19](https://github.com/Jamesits/docker-ripe-atlas/issues/19)). You should upgrade your host distro ASAP.
 

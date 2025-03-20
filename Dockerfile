@@ -1,8 +1,6 @@
 FROM debian:12-slim AS base
 
 ARG ATLAS_UID=101 ATLAS_MEAS_UID=102 ATLAS_GID=999
-# used by entrypoint.sh
-ENV ATLAS_UID=$ATLAS_UID ATLAS_MEAS_UID=$ATLAS_MEAS_UID ATLAS_GID=$ATLAS_GID
 
 # pre-create the required user and group so that their IDs are consistent
 # https://github.com/RIPE-NCC/ripe-atlas-software-probe/blob/17566dd0129a47552556e1f355d33d0114124c60/config/common/ripe-atlas.users.conf.in

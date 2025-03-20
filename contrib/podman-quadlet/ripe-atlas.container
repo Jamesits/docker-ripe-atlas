@@ -6,14 +6,16 @@ Documentation=https://github.com/Jamesits/docker-ripe-atlas
 Image=docker.io/jamesits/ripe-atlas:latest
 Memory=256m
 DropCapability=ALL
-AddCapability=CHOWN
+AddCapability=NET_RAW
+# required for `setpriv` to work
 AddCapability=SETUID
 AddCapability=SETGID
+# required for auto-fixing the permissions of the directories
+AddCapability=CHOWN
 AddCapability=DAC_OVERRIDE
-AddCapability=NET_RAW
 
-# if possible, avoid double NAT
-Network=host
+# avoids double NAT
+# Network=host
 
 Environment=RXTXRPT=yes
 

@@ -11,11 +11,13 @@ services:
     cap_drop:
       - ALL
     cap_add:
-      - CHOWN
+      - NET_RAW
+      # required for `setpriv` to work
       - SETUID
       - SETGID
+      # required for auto-fixing the permissions of the directories
+      - CHOWN
       - DAC_OVERRIDE
-      - NET_RAW
     mem_limit: "64000000000"
     mem_reservation: 64m
     labels:
@@ -25,6 +27,6 @@ services:
       driver: json-file
       options:
          max-size: 10m
-    network_mode: "host" # if possible, avoid double NAT
+    # network_mode: "host" # avoids double NAT
     # security_opt:
     #   - seccomp:unconfined

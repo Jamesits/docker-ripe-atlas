@@ -7,23 +7,21 @@ declare -a OPTIONS=(
 	"HTTP_POST_PORT"
 	"TELNETD_PORT"
 )
-ATLAS_UID="${ATLAS_UID:-101}"
-ATLAS_MEAS_UID="${ATLAS_MEAS_UID:-102}"
-ATLAS_GID="${ATLAS_GID:-999}"
+ENTRYPOINT_DO_NOT_SET_USER="${ENTRYPOINT_DO_NOT_SET_USER:-0}"
 
 # test essential syscalls
 if ! sleep 0 >/dev/null 2>&1; then
-	>&2 printf "WARNING: clock_nanosleep or clock_nanosleep_time64 is not available on the system\n"
+	>&2 printf "[entrypoint.sh]: WARNING: clock_nanosleep or clock_nanosleep_time64 is not available on the system. You might experience weird behavior.\n"
 fi
 
 # detect legacy volume mounts
 if [ -d "/var/atlas-probe" ]; then
-	>&2 printf "WARNING: You are using a legacy volume mount. Please migrate your configuration.\n"
+	>&2 printf "[entrypoint.sh]: WARNING: You are using a legacy volume mount. Please migrate your configuration.\n"
 	# I considered using symlinks, but symlink might destroy the destination files if both legacy volumes and new volumes are mounted.
 	cp -rv /var/atlas-probe/etc/. /etc/ripe-atlas/ || true
 fi
 
-# create essential files and fix permission
+# create essential directories and try to fix their permissions
 chmod 775 -- /run/ripe-atlas || true
 chown ripe-atlas-measurement:ripe-atlas -- /run/ripe-atlas || true
 chmod 2775 -- /var/spool/ripe-atlas || true
@@ -32,17 +30,19 @@ chmod 755 -- /etc/ripe-atlas || true
 chown ripe-atlas:ripe-atlas -- /etc/ripe-atlas || true
 
 # set probe configuration
-echo "prod" > "/etc/ripe-atlas/mode"
-echo "CHECK_ATLASDATA_TMPFS=no" > "${CONFIG_FILE}"
+printf "prod\n" > "/etc/ripe-atlas/mode"
+printf "CHECK_ATLASDATA_TMPFS=no\n" > "${CONFIG_FILE}"
 for OPT in "${OPTIONS[@]}"; do
 	if [ ! -z "${!OPT+x}" ]; then
-		echo "Option ${OPT}=${!OPT}"
-		echo "${OPT}=${!OPT}" >> "${CONFIG_FILE}"
+		>&2 printf "[entrypoint.sh]: Setting option %s=%s\n" "${OPT}" "${!OPT}"
+		printf "%s=%s\n" "${OPT}" "${!OPT}" >> "${CONFIG_FILE}"
 	fi
 done
 
-if [ "$1" = "ripe-atlas" ]; then
-	exec setpriv --reuid="$(id -u ripe-atlas)" --regid="$(id -g ripe-atlas-measurement)" --init-groups -- "$@"
+>&2 printf "[entrypoint.sh]: Done\n"
+if [ "$1" = "ripe-atlas" ] && [ "${ENTRYPOINT_DO_NOT_SET_USER}" != "1" ]; then
+	exec setpriv --reuid="ripe-atlas" --regid="ripe-atlas" --init-groups --ambient-caps=+NET_RAW -- "$@"
 else
+	>&2 printf "[entrypoint.sh]: Continuing as the current user\n"
 	exec "$@"
 fi

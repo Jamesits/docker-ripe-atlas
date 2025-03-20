@@ -1,0 +1,11 @@
+/.github
+/renovate.json
+
+/.git*
+
+/docker-compose*.yaml
+/docker-compose*.yml
+/docker-bake.hcl
+
+/LICENSE
+/README.md

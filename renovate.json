@@ -1,0 +1,8 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        "github>jamesits/.github//renovate/default",
+        "github>jamesits/.github//renovate/group-monorepo"
+    ]
+}

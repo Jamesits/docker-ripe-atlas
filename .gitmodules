@@ -1,0 +1,5 @@
+[submodule "ripe-atlas-software-probe"]
+	path = ripe-atlas-software-probe
+	url = https://github.com/RIPE-NCC/ripe-atlas-software-probe
+	# https://docs.renovatebot.com/modules/manager/git-submodules/#updating-to-specific-tag-values
+	branch = master

@@ -1,14 +1,21 @@
 FROM debian:12-slim AS base
 
+ARG ATLAS_UID=101 ATLAS_MEAS_UID=102 ATLAS_GID=999
+# used by entrypoint.sh
+ENV ATLAS_UID=$ATLAS_UID ATLAS_MEAS_UID=$ATLAS_MEAS_UID ATLAS_GID=$ATLAS_GID
+
 # pre-create the required user and group so that their IDs are consistent
-ARG ATLAS_UID=101
-ARG ATLAS_MEAS_UID=102
-ARG ATLAS_GID=999
-RUN adduser --system --uid $ATLAS_UID ripe-atlas \
-	&& adduser --system --uid $ATLAS_MEAS_UID ripe-atlas-measurement \
+# https://github.com/RIPE-NCC/ripe-atlas-software-probe/blob/17566dd0129a47552556e1f355d33d0114124c60/config/common/ripe-atlas.users.conf.in
+RUN adduser --system --uid $ATLAS_UID --home /run/ripe-atlas ripe-atlas \
+	&& adduser --system --uid $ATLAS_MEAS_UID --home /var/spool/ripe-atlas ripe-atlas-measurement \
 	&& groupadd --force --system --gid $ATLAS_GID ripe-atlas \
 	&& usermod -aG ripe-atlas ripe-atlas \
 	&& usermod -aG ripe-atlas ripe-atlas-measurement
+
+# create the required directories
+# https://github.com/RIPE-NCC/ripe-atlas-software-probe/blob/17566dd0129a47552556e1f355d33d0114124c60/config/common/ripe-atlas.run.conf.in
+RUN install --owner=ripe-atlas-measurement --group=ripe-atlas --mode=0755 --directory /run/ripe-atlas \
+	&& install --owner=ripe-atlas --group=ripe-atlas --mode=2775 --directory /var/spool/ripe-atlas
 
 # install common packages
 ARG DEBIAN_FRONTEND=noninteractive
@@ -26,7 +33,7 @@ RUN apt-get update -y \
 	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root
-COPY --link ./ripe-atlas-software-probe /root/ripe-atlas-software-probe
+COPY ./ripe-atlas-software-probe /root/ripe-atlas-software-probe
 RUN cd ripe-atlas-software-probe \
 	&& dpkg-buildpackage -b -us -uc
 
@@ -34,7 +41,7 @@ RUN cd ripe-atlas-software-probe \
 FROM scratch AS artifacts
 LABEL image="ripe-atlas-artifacts"
 
-COPY --link --from=builder /root/*.deb /
+COPY --from=builder /root/*.deb /
 
 ######## Release: ripe-atlas-anchor ########
 FROM base as ripe-atlas-anchor
@@ -45,7 +52,7 @@ RUN apt-get update -y \
 	&& apt install -fy /tmp/ripe-atlas*.deb \
 	&& rm -rf /var/lib/apt/lists/* /tmp/*.deb
 
-COPY --link --chown=0:0 rootfs_overrides/. /
+COPY --chown=0:0 rootfs_overrides/. /
 WORKDIR /run/ripe-atlas
 VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas/status" ]
 ENTRYPOINT [ "tini", "--", "entrypoint.sh" ]

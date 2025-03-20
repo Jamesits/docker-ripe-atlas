@@ -1,12 +1,13 @@
 services:
   ripe-atlas:
-    image: jamesits/ripe-atlas:latest
+    image: docker.io/jamesits/ripe-atlas:latest
     restart: always
     environment:
       RXTXRPT: "yes"
     volumes:
-      - "/var/atlas-probe/etc:/var/atlas-probe/etc"
-      - "/var/atlas-probe/status:/var/atlas-probe/status"
+      - "./deployment/etc:/etc/ripe-atlas"
+      - "./deployment/run:/run/ripe-atlas"
+      - "./deployment/spool:/var/spool/ripe-atlas"
     cap_drop:
       - ALL
     cap_add:
@@ -24,6 +25,6 @@ services:
       driver: json-file
       options:
          max-size: 10m
-    # network_mode: "host" # if possible, avoid double NAT
+    network_mode: "host" # if possible, avoid double NAT
     # security_opt:
     #   - seccomp:unconfined

@@ -1,10 +1,9 @@
 /.github
 /renovate.json
+/contrib
 
 /.git*
 
-/docker-compose*.yaml
-/docker-compose*.yml
 /docker-bake.hcl
 
 /LICENSE

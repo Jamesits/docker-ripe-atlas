@@ -7,32 +7,33 @@ declare -a OPTIONS=(
 	"HTTP_POST_PORT"
 	"TELNETD_PORT"
 )
+ATLAS_UID="${ATLAS_UID:-101}"
+ATLAS_MEAS_UID="${ATLAS_MEAS_UID:-102}"
+ATLAS_GID="${ATLAS_GID:-999}"
 
 # test essential syscalls
 if ! sleep 0 >/dev/null 2>&1; then
-	>&2 echo "WARNING: clock_nanosleep or clock_nanosleep_time64 is not available on the system"
+	>&2 printf "WARNING: clock_nanosleep or clock_nanosleep_time64 is not available on the system\n"
 fi
 
-export ATLAS_UID="${ATLAS_UID:-101}"
-export ATLAS_MEAS_UID="${ATLAS_MEAS_UID:-102}"
-export ATLAS_GID="${ATLAS_GID:-999}"
-
-usermod -u $ATLAS_UID ripe-atlas
-usermod -u $ATLAS_MEAS_UID ripe-atlas-measurement
-groupmod -g $ATLAS_GID ripe-atlas
+# detect legacy volume mounts
+if [ -d "/var/atlas-probe" ]; then
+	>&2 printf "WARNING: You are using a legacy volume mount. Please migrate your configuration.\n"
+	# I considered using symlinks, but symlink might destroy the destination files if both legacy volumes and new volumes are mounted.
+	cp -rv /var/atlas-probe/etc/. /etc/ripe-atlas/ || true
+fi
 
 # create essential files and fix permission
-mkdir -p /run/ripe-atlas
-chmod -R 775 /run/ripe-atlas || true
-chown -R ripe-atlas:ripe-atlas /run/ripe-atlas || true
-mkdir -p /var/spool/ripe-atlas
-chown -R ripe-atlas:ripe-atlas /var/spool/ripe-atlas || true
-mkdir -p /etc/ripe-atlas
-echo "CHECK_ATLASDATA_TMPFS=no" > "${CONFIG_FILE}"
-echo "prod" > "/etc/ripe-atlas/mode"
-chown -R ripe-atlas:ripe-atlas /etc/ripe-atlas || true
+chmod 775 -- /run/ripe-atlas || true
+chown ripe-atlas-measurement:ripe-atlas -- /run/ripe-atlas || true
+chmod 2775 -- /var/spool/ripe-atlas || true
+chown ripe-atlas:ripe-atlas -- /var/spool/ripe-atlas || true
+chmod 755 -- /etc/ripe-atlas || true
+chown ripe-atlas:ripe-atlas -- /etc/ripe-atlas || true
 
 # set probe configuration
+echo "prod" > "/etc/ripe-atlas/mode"
+echo "CHECK_ATLASDATA_TMPFS=no" > "${CONFIG_FILE}"
 for OPT in "${OPTIONS[@]}"; do
 	if [ ! -z "${!OPT+x}" ]; then
 		echo "Option ${OPT}=${!OPT}"
@@ -40,4 +41,8 @@ for OPT in "${OPTIONS[@]}"; do
 	fi
 done
 
-exec setpriv --reuid=$ATLAS_UID --regid=$ATLAS_GID --init-groups "$@"
+if [ "$1" = "ripe-atlas" ]; then
+	exec setpriv --reuid=$ATLAS_UID --regid=$ATLAS_GID --init-groups "$@"
+else
+	exec "$@"
+fi

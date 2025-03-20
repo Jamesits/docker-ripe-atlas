@@ -28,31 +28,24 @@ Since version 5090, we do not provide `-{arch}` tags anymore.
 
 ### Running
 
-#### Using `docker run`
+You can run the container manually with any OCI container runtime of your choice. There are some templates:
 
-First we start the container:
-
-```shell
-docker run --detach --restart=always \
-	--log-driver json-file --log-opt max-size=10m \
-	--cpus=1 --memory=64m --memory-reservation=64m \
-	--cap-drop=ALL --cap-add=CHOWN --cap-add=SETUID --cap-add=SETGID --cap-add=DAC_OVERRIDE --cap-add=NET_RAW \
-	-v /etc/ripe-atlas:/etc/ripe-atlas \
-	-v /run/ripe-atlas/status:/run/ripe-atlas/status \
-	-e RXTXRPT=yes \
-	--name ripe-atlas --hostname "$(hostname --fqdn)" \
-	docker.io/jamesits/ripe-atlas:latest
-```
-
-#### Using Docker Compose
+#### Using [Docker Compose](https://docs.docker.com/compose/)
 
 An example [`docker-compose.yaml`](/docker-compose.yaml) is provided.
 
 ```shell
-git clone https://github.com/Jamesits/docker-ripe-atlas.git
-cd docker-ripe-atlas
+cd contrib/docker-compose
 docker-compose pull
 docker-compose up -d
+```
+
+#### Using [`podman-systemd.unit`](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
+
+```shell
+install --user=root --group=root --target /etc/containers/systemd/ -- contrib/podman-quadlet/*.container
+systemctl reload
+systemctl start ripe-atlas.service
 ```
 
 ### Registering the Probe
@@ -146,3 +139,12 @@ Just backup the mounted directories.
 ### Running under Debian 10
 
 When the host distro is Debian 10 or similarly old ones, you might need to add `--security-opt seccomp:unconfined` to the `docker run` command to make things work. We don't recommend using EOL'ed distros.
+
+### Upgrading from 5080 to 5100 or Later
+
+```shell
+# stop the container
+mv /var/atlas-probe/etc /etc/ripe-atlas
+rm -rf /var/atlas-probe
+# start the container with new configuration
+```

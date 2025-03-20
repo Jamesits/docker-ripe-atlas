@@ -1,0 +1,31 @@
+[Unit]
+Description=RIPE Atlas Software Probe
+Documentation=https://github.com/Jamesits/docker-ripe-atlas
+
+[Container]
+Image=docker.io/jamesits/ripe-atlas:latest
+Memory=256m
+DropCapability=ALL
+AddCapability=CHOWN
+AddCapability=SETUID
+AddCapability=SETGID
+AddCapability=DAC_OVERRIDE
+AddCapability=NET_RAW
+
+# if possible, avoid double NAT
+Network=host
+
+Environment=RXTXRPT=yes
+
+Volume=/etc/ripe-atlas:/etc/ripe-atlas
+Volume=/run/ripe-atlas:/run/ripe-atlas
+Volume=/var/spool/ripe-atlas:/var/spool/ripe-atlas
+
+# https://docs.podman.io/en/latest/markdown/podman-auto-update.1.html
+AutoUpdate=registry
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

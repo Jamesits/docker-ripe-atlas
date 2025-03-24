@@ -53,7 +53,9 @@ jobs:
             docker-bake.hcl
             cwd://${{ steps.metadata-probe.outputs.bake-file }}
             cwd://${{ steps.metadata-anchor.outputs.bake-file }}
+          # Can't use `push: true` here, have to set them individually
           set: |
+            artifacts.output=type=local,dest=out/
             ripe-atlas-anchor.output=type=registry
             ripe-atlas-probe.output=type=registry
       - uses: actions/upload-artifact@v4

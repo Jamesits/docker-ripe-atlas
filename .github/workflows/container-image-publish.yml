@@ -6,6 +6,11 @@ on:
       - master
     tags:
       - v*
+    paths-ignore:
+      - 'contrib/**'
+      - 'README.md'
+      - 'LICENSE'
+      - 'renovate.json'
 
 jobs:
   build:

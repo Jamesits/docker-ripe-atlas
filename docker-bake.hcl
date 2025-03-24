@@ -1,3 +1,4 @@
+# Set this if you use an internal Docker Hub mirror
 variable "CR_DOCKER_HUB_PREFIX" {
     default = "docker.io"
 }
@@ -25,6 +26,7 @@ target "_default" {
     ]
 }
 
+# For exporting the `*.deb` files
 target "artifacts" {
     inherits = ["_default"]
     target = "artifacts"
@@ -44,6 +46,7 @@ target "_ripe-atlas-probe" {
     ]
 }
 
+# To be overriden by the CI pipeline
 target "ripe-atlas-probe" {
     inherits = ["_default", "_ripe-atlas-probe"]
 }
@@ -54,11 +57,11 @@ target "_ripe-atlas-anchor" {
         "index,manifest:org.opencontainers.image.title=ripe-atlas-anchor",
     ]
     tags = [
-        "${IMAGE_TAG_PREFIX}:latest",
         "${IMAGE_TAG_PREFIX}:latest-anchor",
     ]
 }
 
+# To be overriden by the CI pipeline
 target "ripe-atlas-anchor" {
     inherits = ["_default", "_ripe-atlas-anchor"]
 }

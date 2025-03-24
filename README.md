@@ -63,7 +63,7 @@ cat /etc/ripe-atlas/probe_key.pub
 If you don't want to use the prebuilt image hosted on the Docker Hub, you can build your own image.
 
 ```shell
-DOCKER_BUILDKIT=1 docker build -t ripe-atlas .
+DOCKER_BUILDKIT=1 docker build --tag localhost/ripe-atlas:latest-probe --target ripe-atlas-probe .
 ```
 
 Note that building this container image requires [BuildKit](https://docs.docker.com/develop/develop-images/build_enhancements/).

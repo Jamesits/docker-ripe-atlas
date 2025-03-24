@@ -60,6 +60,6 @@ jobs:
         with:
           name: "deb"
           path: |
-            output/
+            out/
           retention-days: 3
           compression-level: 0

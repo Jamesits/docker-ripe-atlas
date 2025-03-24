@@ -42,7 +42,7 @@ LABEL image="ripe-atlas-artifacts"
 COPY --from=builder /root/*.deb /
 
 ######## Release: ripe-atlas-anchor ########
-FROM base as ripe-atlas-anchor
+FROM base AS ripe-atlas-anchor
 
 COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-anchor_*.deb /tmp/
 ARG DEBIAN_FRONTEND=noninteractive
@@ -63,7 +63,7 @@ ENTRYPOINT [ "tini", "--", "entrypoint.sh" ]
 CMD [ "ripe-atlas" ]
 
 ######## Release: ripe-atlas-probe ########
-FROM base as ripe-atlas-probe
+FROM base AS ripe-atlas-probe
 
 COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-probe_*.deb /tmp/
 ARG DEBIAN_FRONTEND=noninteractive

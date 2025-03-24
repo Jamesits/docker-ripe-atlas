@@ -21,7 +21,7 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas):
 
 - `latest`, `latest-probe`, `latest-anchor`: latest stable version
-- `{version}`, `{version}-probe`, `{version}-anchor`: matches upstream version
+- `v{version}`, `v{version}-probe`, `v{version}-anchor`: matches upstream version
 - `edge`, `edge-probe`, `edge-anchor`: whatever from the master branch
 
 Since version 5090, we do not provide `-{arch}` tags anymore.

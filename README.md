@@ -155,9 +155,10 @@ When the host distro is Debian 10 or similarly old ones, you might need to add `
 
 ### Upgrading from 5080 to 5100 or Later
 
-```shell
-# stop the container
-mv /var/atlas-probe/etc /etc/ripe-atlas
-rm -rf /var/atlas-probe
-# start the container with new configuration
-```
+At version 5090, upstream introduced a lot changes that require manual intervention.
+
+- You need to update the container startup arguments. See [contrib](contrib) for an example. Note that new permissions are required to make the directory initialization process work.
+- The SSH keys are stored at `/etc/ripe-atlas` now. Please `mv /var/atlas-probe/etc /etc/ripe-atlas` and make sure they are owned by `100:998` (before subuid/subgid mapping, if applicable).
+- `/var/atlas-probe` is not used anymore and should be removed.
+- `/var/spool/ripe-atlas` and `/run/atlas` are now used to store probe runtime info.
+- If you are still using `latest-{arch}` tags, please update to use only `latest`.

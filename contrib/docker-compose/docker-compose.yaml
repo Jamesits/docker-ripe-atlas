@@ -17,7 +17,7 @@ services:
       # required for `setpriv` to work
       - SETUID
       - SETGID
-      # required for auto-fixing the permissions of the directories
+      # required for the entrypoint script to auto-fix the permissions of the directories
       - CHOWN
       - FOWNER
       - DAC_OVERRIDE

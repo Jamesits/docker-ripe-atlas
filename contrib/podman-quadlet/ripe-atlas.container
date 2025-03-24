@@ -12,7 +12,7 @@ AddCapability=KILL
 # required for `setpriv` to work
 AddCapability=SETUID
 AddCapability=SETGID
-# required for auto-fixing the permissions of the directories
+# required for the entrypoint script to auto-fix the permissions of the directories
 AddCapability=FOWNER
 AddCapability=CHOWN
 AddCapability=DAC_OVERRIDE

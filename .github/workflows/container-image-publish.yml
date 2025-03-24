@@ -54,8 +54,8 @@ jobs:
             cwd://${{ steps.metadata-probe.outputs.bake-file }}
             cwd://${{ steps.metadata-anchor.outputs.bake-file }}
           set: |
-            target.ripe-atlas-anchor.output=type=registry
-            target.ripe-atlas-probe.output=type=registry
+            ripe-atlas-anchor.output=type=registry
+            ripe-atlas-probe.output=type=registry
       - uses: actions/upload-artifact@v4
         with:
           name: "deb"

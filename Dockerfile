@@ -1,82 +1,84 @@
-## builder
-FROM --platform=$BUILDPLATFORM debian:11-slim as builder
-LABEL image="ripe-atlas-builder"
-ARG BUILDPLATFORM
-ARG TARGETPLATFORM
+FROM debian:12-slim AS base
+
+ARG ATLAS_UID=101 ATLAS_MEAS_UID=102 ATLAS_GID=999
+
+# pre-create the required user and group so that their IDs are consistent
+# https://github.com/RIPE-NCC/ripe-atlas-software-probe/blob/17566dd0129a47552556e1f355d33d0114124c60/config/common/ripe-atlas.users.conf.in
+RUN adduser --system --uid $ATLAS_UID --home /run/ripe-atlas ripe-atlas \
+	&& adduser --system --uid $ATLAS_MEAS_UID --home /var/spool/ripe-atlas ripe-atlas-measurement \
+	&& groupadd --force --system --gid $ATLAS_GID ripe-atlas \
+	&& usermod -aG ripe-atlas ripe-atlas \
+	&& usermod -aG ripe-atlas ripe-atlas-measurement
+
+# create the required directories
+# https://github.com/RIPE-NCC/ripe-atlas-software-probe/blob/17566dd0129a47552556e1f355d33d0114124c60/config/common/ripe-atlas.run.conf.in
+RUN install --owner=ripe-atlas-measurement --group=ripe-atlas --mode=0755 --directory /run/ripe-atlas \
+	&& install --owner=ripe-atlas --group=ripe-atlas --mode=2775 --directory /var/spool/ripe-atlas
+
+# install common packages
 ARG DEBIAN_FRONTEND=noninteractive
-ARG GIT_URL=https://github.com/RIPE-NCC/ripe-atlas-software-probe.git
+RUN apt-get update -y \
+	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools tini \
+	&& rm -rf /var/lib/apt/lists/*
+
+######## builder ########
+FROM base AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+# Note: systemd must exist for the package to build; otherwise systemd unit templates will fail to generate
+RUN apt-get update -y \
+	&& apt-get install -y git build-essential debhelper libssl-dev autotools-dev systemd \
+	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root
+COPY ./ripe-atlas-software-probe /root/ripe-atlas-software-probe
+RUN cd ripe-atlas-software-probe \
+	&& dpkg-buildpackage -b -us -uc
 
-RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
-		case ${TARGETPLATFORM} in \
-			"linux/arm64")	echo 'export CROSSBUILD_ARCH=arm64 CROSS_COMPILE_TARGET=aarch64-linux-gnu' > env ;; \
-			"linux/arm/v7")	echo 'export CROSSBUILD_ARCH=armhf CROSS_COMPILE_TARGET=arm-linux-gnueabihf' > env ;; \
-			"linux/386")	echo 'export CROSSBUILD_ARCH=i386 CROSS_COMPILE_TARGET=i686-linux-gnu' > env ;; \
-			"linux/amd64")	echo 'export CROSSBUILD_ARCH=amd64 CROSS_COMPILE_TARGET=x86_64-linux-gnu' > env ;; \
-			*) echo "Unsupported platform"; exit 1 ;; \
-		esac \
-		&& . ./env \
-		&& dpkg --add-architecture $CROSSBUILD_ARCH \
-		&& apt-get update -y \
-		&& apt-get install -y libssl-dev:$CROSSBUILD_ARCH crossbuild-essential-$CROSSBUILD_ARCH; \
-	fi \
-	&& apt-get update -y \
-	&& apt-get install -y git tar fakeroot libssl-dev libcap2-bin autoconf automake libtool build-essential
-
-RUN git clone --recursive "$GIT_URL"
-
-# Revert to 5080, 5090 needs further testing
-WORKDIR /root/ripe-atlas-software-probe
-RUN git checkout 67b0736887d33d1c42557e7c7694cbd4e5d8e6ee .
-RUN git submodule update
-WORKDIR /root
-
-RUN if [ "$BUILDPLATFORM" != "$TARGETPLATFORM" ] ; then \
-		. ./env \
-		&& export CROSS_COMPILE="$CROSS_COMPILE_TARGET-" \
-		&& sed -i 's/.\/configure/.\/configure --host='$CROSS_COMPILE_TARGET'/g' ./ripe-atlas-software-probe/build-config/debian/bin/make-deb \
-		&& sed -i 's/ARCH=$(get_arch)/ARCH='$CROSSBUILD_ARCH'/g' ./ripe-atlas-software-probe/build-config/debian/bin/make-deb; \
-	fi \
-	&& ./ripe-atlas-software-probe/build-config/debian/bin/make-deb
-
-## artifacts
+######## artifacts ########
 FROM scratch AS artifacts
 LABEL image="ripe-atlas-artifacts"
 
-COPY --from=builder /root/atlasswprobe-*.deb /
+COPY --from=builder /root/*.deb /
 
-## the actual image
-FROM debian:11-slim
-LABEL maintainer="dockerhub@public.swineson.me"
-LABEL image="ripe-atlas"
+######## Release: ripe-atlas-anchor ########
+FROM base as ripe-atlas-anchor
+
+COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-anchor_*.deb /tmp/
 ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y \
+	&& apt install -fy /tmp/ripe-atlas*.deb \
+	&& rm -rf /var/lib/apt/lists/* /tmp/*.deb
 
-COPY --from=builder /root/atlasswprobe-*.deb /tmp
+COPY --chown=0:0 rootfs_overrides/. /
 
-ARG ATLAS_UID=101
-ARG ATLAS_GID=999
-RUN ln -s /bin/true /bin/systemctl \
-	&& adduser --system --uid $ATLAS_UID atlas \
-	&& groupadd --force --system --gid $ATLAS_GID atlas \
-	&& usermod -aG atlas atlas \
-	&& apt-get update -y \
-	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools tini \
-	&& dpkg -i /tmp/atlasswprobe-*.deb \
-	&& apt-get install -fy \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& rm -f /tmp/atlasswprobe-*.deb \
-	&& ln -s /usr/local/atlas/bin/ATLAS /usr/local/bin/atlas
+RUN mkdir -p /usr/share/factory/etc /usr/share/factory/run /usr/share/factory/var/spool \
+	&& cp -rpv /etc/ripe-atlas /usr/share/factory/etc/ripe-atlas \
+	&& cp -rpv /run/ripe-atlas /usr/share/factory/run/ripe-atlas \
+	&& cp -rpv /var/spool/ripe-atlas /usr/share/factory/var/spool/ripe-atlas
 
-COPY entrypoint.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/* \
-	&& chown -R atlas:atlas /var/atlas-probe \
-	&& mkdir -p /var/atlasdata \
-	&& chown -R atlas:atlas /var/atlasdata \
-	&& chmod 777 /var/atlasdata
-
-WORKDIR /var/atlas-probe
-VOLUME [ "/var/atlas-probe/etc", "/var/atlas-probe/status" ]
-
+WORKDIR /run/ripe-atlas
+VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas", "/var/spool/ripe-atlas" ]
 ENTRYPOINT [ "tini", "--", "entrypoint.sh" ]
-CMD [ "atlas" ]
+CMD [ "ripe-atlas" ]
+
+######## Release: ripe-atlas-probe ########
+FROM base as ripe-atlas-probe
+
+COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-probe_*.deb /tmp/
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y \
+	&& apt install -fy /tmp/ripe-atlas-*.deb \
+	&& rm -rf /var/lib/apt/lists/* /tmp/*.deb
+
+COPY --chown=0:0 rootfs_overrides/. /
+
+RUN mkdir -p /usr/share/factory/etc /usr/share/factory/run /usr/share/factory/var/spool \
+	&& cp -rpv /etc/ripe-atlas /usr/share/factory/etc/ripe-atlas \
+	&& cp -rpv /run/ripe-atlas /usr/share/factory/run/ripe-atlas \
+	&& cp -rpv /var/spool/ripe-atlas /usr/share/factory/var/spool/ripe-atlas
+
+WORKDIR /run/ripe-atlas
+VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas", "/var/spool/ripe-atlas" ]
+ENTRYPOINT [ "tini", "--", "entrypoint.sh" ]
+CMD [ "ripe-atlas" ]

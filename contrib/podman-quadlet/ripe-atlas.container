@@ -1,0 +1,36 @@
+[Unit]
+Description=RIPE Atlas Software Probe
+Documentation=https://github.com/Jamesits/docker-ripe-atlas
+
+[Container]
+Image=docker.io/jamesits/ripe-atlas:latest
+Memory=256m
+DropCapability=ALL
+AddCapability=NET_RAW
+# required for tini
+AddCapability=KILL
+# required for `setpriv` to work
+AddCapability=SETUID
+AddCapability=SETGID
+# required for the entrypoint script to auto-fix the permissions of the directories
+AddCapability=FOWNER
+AddCapability=CHOWN
+AddCapability=DAC_OVERRIDE
+
+# avoids double NAT
+# Network=host
+
+Environment=RXTXRPT=yes
+
+Volume=/etc/ripe-atlas:/etc/ripe-atlas
+Volume=/run/ripe-atlas:/run/ripe-atlas
+Volume=/var/spool/ripe-atlas:/var/spool/ripe-atlas
+
+# https://docs.podman.io/en/latest/markdown/podman-auto-update.1.html
+AutoUpdate=registry
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

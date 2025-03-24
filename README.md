@@ -2,9 +2,13 @@
 
 This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-probe/) packaged as a Docker image.
 
-[![Build Status](https://dev.azure.com/nekomimiswitch/General/_apis/build/status/docker-ripe-atlas?branchName=master)](https://dev.azure.com/nekomimiswitch/General/_build/latest?definitionId=83&branchName=master)
+![Works - On My Machine](https://img.shields.io/badge/Works-On_My_Machine-2ea44f)
+![Project Status - Feature Complete](https://img.shields.io/badge/Project_Status-Feature_Complete-2ea44f)
+[![Docker Image Version](https://img.shields.io/docker/v/jamesits/ripe-atlas?label=Docker%20Hub&sort=semver)](http://hub.docker.com/r/jamesits/ripe-atlas)
 
-## Requirements
+## Usage
+
+### Requirements
 
 * 1 CPU core (of course)
 * 20MiB memory
@@ -12,51 +16,44 @@ This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-pro
 * A Linux installation with Docker installed
 * Internet access
 
-## Tags
+### Tags
 
-The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas). The `latest` tag supports [multi-arch](https://www.docker.com/blog/multi-arch-build-and-images-the-simple-way/), and should be used by default.
+The following prebuilt tags are available at [Docker Hub](https://hub.docker.com/r/jamesits/ripe-atlas):
 
-* **`latest`: For all supported devices listed below (multi-arch)**
-* `latest-arm64`: For arm64 (aarch64) devices
-* `latest-armv7l`: For armv7l (armhf) devices
-* `latest-i386`: For i386 devices
-* `latest-amd64`: For amd64 devices
+- `latest`, `latest-probe`, `latest-anchor`: latest stable version
+- `{version}`, `{version}-probe`, `{version}-anchor`: matches upstream version
+- `edge`, `edge-probe`, `edge-anchor`: whatever from the master branch
 
-## Running
+Since version 5090, we do not provide `-{arch}` tags anymore.
 
-### Using `docker run`
+### Running
 
-First we start the container:
+You can run the container manually with any OCI container runtime of your choice. There are some templates:
 
-```shell
-docker run --detach --restart=always \
-	--log-driver json-file --log-opt max-size=10m \
-	--cpus=1 --memory=64m --memory-reservation=64m \
-	--cap-drop=ALL --cap-add=CHOWN --cap-add=SETUID --cap-add=SETGID --cap-add=DAC_OVERRIDE --cap-add=NET_RAW \
-	-v /var/atlas-probe/etc:/var/atlas-probe/etc \
-	-v /var/atlas-probe/status:/var/atlas-probe/status \
-	-e RXTXRPT=yes \
-	--name ripe-atlas --hostname "$(hostname --fqdn)" \
-	jamesits/ripe-atlas:latest
-```
+#### Using [Docker Compose](https://docs.docker.com/compose/)
 
-### Using Docker Compose
-
-An example [`docker-compose.yaml`](/docker-compose.yaml) is provided. 
+An example [`docker-compose.yaml`](/docker-compose.yaml) is provided.
 
 ```shell
-git clone https://github.com/Jamesits/docker-ripe-atlas.git
-cd docker-ripe-atlas
+cd contrib/docker-compose
 docker-compose pull
 docker-compose up -d
 ```
 
-## Registering the Probe
+#### Using [`podman-systemd.unit`](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
+
+```shell
+install --user=root --group=root --target /etc/containers/systemd/ -- contrib/podman-quadlet/*.container
+systemctl reload
+systemctl start ripe-atlas.service
+```
+
+### Registering the Probe
 
 Fetch the generated public key:
 
 ```shell
-cat /var/atlas-probe/etc/probe_key.pub
+cat /etc/ripe-atlas/probe_key.pub
 ```
 
 [Register](https://atlas.ripe.net/apply/swprobe/) the probe with your public key. After the registration being manually processed, you'll see your new probe in your account.
@@ -97,9 +94,9 @@ Notes:
 
 #### Using NAT (NPTv6)
 
-If your ISP does not conform to [BCOP 690](https://www.ripe.net/publications/docs/ripe-690) (very common), and/or your router cannot route smaller blocks of IPv6 to one server even if it has been assigned a block of valid IPv6 addresses (also very common), the method above might not work for you. As a workaround, you can setup NAT with either [Docker's builtin experimental IPv6 NAT support](https://blog.iphoting.com/blog/2021/02/10/ipv6-docker-docker-compose-and-shorewall6-ip6tables/), `robbertkl/docker-ipv6nat` or similar projects. Manual iptables/nftables NAT setup is also possible, but *hanc marginis exiguitas non caperet*. 
+If your ISP does not conform to [BCOP 690](https://www.ripe.net/publications/docs/ripe-690) (very common), and/or your router cannot route smaller blocks of IPv6 to one server even if it has been assigned a block of valid IPv6 addresses (also very common), the method above might not work for you. As a workaround, you can setup NAT with either [Docker's builtin experimental IPv6 NAT support](https://blog.iphoting.com/blog/2021/02/10/ipv6-docker-docker-compose-and-shorewall6-ip6tables/), `robbertkl/docker-ipv6nat` or similar projects. Manual iptables/nftables NAT setup is also possible, but *hanc marginis exiguitas non caperet*.
 
-Firstly, edit kernel parameters to enable IPv6 routing. 
+Firstly, edit kernel parameters to enable IPv6 routing.
 
 ```shell
 cat > /etc/sysctl.d/50-docker-ipv6.conf <<EOF
@@ -123,7 +120,7 @@ docker network create --ipv6 --subnet=fd00:a1a3::/48 ripe-atlas-network
 docker run -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro --cap-drop=ALL --cap-add=NET_RAW --cap-add=NET_ADMIN --cap-add=SYS_MODULE --net=host --name=ipv6nat robbertkl/ipv6nat:latest
 ```
 
-Finally, start the RIPE Atlas container with argument `--net=ripe-atlas-network`. 
+Finally, start the RIPE Atlas container with argument `--net=ripe-atlas-network`.
 
 ### Auto Update
 
@@ -137,8 +134,31 @@ Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.w
 
 ### Backup
 
-All the config files are stored at `/var/atlas-probe`. Just backup it.
+Just backup the mounted directories.
 
-### Running under Debian 10
+### Security
 
-When the host distro is Debian 10 or similarly old ones, you might need to add `--security-opt seccomp:unconfined` to the `docker run` command to make things work. We don't recommend using EOL'ed distros.
+Upstream software does not correctly use Linux [capabilities(7)](https://man7.org/linux/man-pages/man7/capabilities.7.html) and tries to mess up everything by using `setuid` executables. So:
+
+| Container Runtime | Container User | Network Namespace | Works | Caveats                                  |
+|-------------------|----------------|-------------------|-------|------------------------------------------|
+| root              | root           | separate          | YES   |                                          |
+| root              | non-root       | separate          | NO    | daemons does not start                   |
+| root              | root           | host              | ?     |                                          |
+| root              | non-root       | host              | NO    | daemons does not start                   |
+| rootless          | root           | separate          | YES   | traceroute might not work                |
+| rootless          | non-root       | separate          | NO    | daemons does not start                   |
+| rootless          | root           | host              | NO    | `eooqd: socket: Operation not permitted` |
+| rootless          | non-root       | host              | NO    | daemons does not start                   |
+
+When the host distro is Debian 10 or similarly old ones, you might need to add `--security-opt seccomp:unconfined` to the `docker run` command to make things work ([#19](https://github.com/Jamesits/docker-ripe-atlas/issues/19)). You should upgrade your host distro ASAP.
+
+### Upgrading from 5080 to 5100 or Later
+
+At version 5090, upstream introduced a lot changes that require manual intervention.
+
+- You need to update the container startup arguments. See [Running](#running) for an example. Note that new permissions are required to make the directory initialization process work.
+- The SSH keys are stored at `/etc/ripe-atlas` now. Please `mv /var/atlas-probe/etc /etc/ripe-atlas` and make sure they are owned by `100:998` (before subuid/subgid mapping, if applicable).
+- `/var/atlas-probe` is not used anymore and should be removed.
+- `/var/spool/ripe-atlas` and `/run/atlas` are now used to store probe runtime info.
+- If you are still using `latest-{arch}` tags, please update to use only `latest`.

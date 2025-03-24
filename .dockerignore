@@ -1,0 +1,10 @@
+/.github
+/renovate.json
+/contrib
+
+/.git*
+
+/docker-bake.hcl
+
+/LICENSE
+/README.md

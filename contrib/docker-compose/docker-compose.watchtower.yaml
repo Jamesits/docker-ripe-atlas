@@ -1,7 +1,7 @@
 # a very aggressive watchtower config, useful when deploying in a headless environment
 services:
   watchtower:
-    image: containrrr/watchtower
+    image: docker.io/containrrr/watchtower:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # - /root/.docker/config.json:/config.json # enable only if you need it

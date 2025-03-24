@@ -1,20 +1,26 @@
 services:
   ripe-atlas:
-    image: jamesits/ripe-atlas:latest
+    image: docker.io/jamesits/ripe-atlas:latest
     restart: always
     environment:
       RXTXRPT: "yes"
     volumes:
-      - "/var/atlas-probe/etc:/var/atlas-probe/etc"
-      - "/var/atlas-probe/status:/var/atlas-probe/status"
+      - "/etc/ripe-atlas/etc:/etc/ripe-atlas"
+      - "/var/run/ripe-atlas:/run/ripe-atlas"
+      - "/var/spool/ripe-atlas:/var/spool/ripe-atlas"
     cap_drop:
       - ALL
     cap_add:
-      - CHOWN
+      - NET_RAW
+      # required for tini
+      - KILL
+      # required for `setpriv` to work
       - SETUID
       - SETGID
+      # required for the entrypoint script to auto-fix the permissions of the directories
+      - CHOWN
+      - FOWNER
       - DAC_OVERRIDE
-      - NET_RAW
     mem_limit: "64000000000"
     mem_reservation: 64m
     labels:
@@ -24,6 +30,6 @@ services:
       driver: json-file
       options:
          max-size: 10m
-    # network_mode: "host" # if possible, avoid double NAT
+    # network_mode: "host" # avoids double NAT
     # security_opt:
     #   - seccomp:unconfined

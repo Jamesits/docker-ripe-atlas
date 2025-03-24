@@ -134,7 +134,11 @@ Then start the RIPE Atlas container with argument `--label=com.centurylinklabs.w
 
 ### Backup
 
-Just backup the mounted directories.
+Back up `/etc/ripe-atlas` is enough.
+
+### Resetting the Probe
+
+If the probe is acting weird or not connecting to the server for a prelonged time without any error logs, you can try resetting the probe's internal state by deleting everything in `/var/spool/ripe-atlas` and `/run/ripe-atlas` then restarting the container.
 
 ### Security
 
@@ -160,5 +164,5 @@ At version 5090, upstream introduced a lot changes that require manual intervent
 - You need to update the container startup arguments. See [Running](#running) for an example. Note that new permissions are required to make the directory initialization process work.
 - The SSH keys are stored at `/etc/ripe-atlas` now. Please `mv /var/atlas-probe/etc /etc/ripe-atlas` and make sure they are owned by `100:998` (before subuid/subgid mapping, if applicable).
 - `/var/atlas-probe` is not used anymore and should be removed.
-- `/var/spool/ripe-atlas` and `/run/atlas` are now used to store probe runtime info.
+- `/var/spool/ripe-atlas` and `/run/ripe-atlas` are now used to store probe runtime info.
 - If you are still using `latest-{arch}` tags, please update to use only `latest`.

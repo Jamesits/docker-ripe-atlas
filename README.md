@@ -32,7 +32,7 @@ You can run the container manually with any OCI container runtime of your choice
 
 #### Using [Docker Compose](https://docs.docker.com/compose/)
 
-An example [`docker-compose.yaml`](/docker-compose.yaml) is provided.
+An example [`docker-compose.yaml`](/contrib/docker-compose/docker-compose.yaml) is provided.
 
 ```shell
 cd contrib/docker-compose

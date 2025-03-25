@@ -5,8 +5,8 @@ services:
     environment:
       RXTXRPT: "yes"
     volumes:
-      - "/etc/ripe-atlas/etc:/etc/ripe-atlas"
-      - "/var/run/ripe-atlas:/run/ripe-atlas"
+      - "/etc/ripe-atlas:/etc/ripe-atlas"
+      - "/run/ripe-atlas:/run/ripe-atlas"
       - "/var/spool/ripe-atlas:/var/spool/ripe-atlas"
     cap_drop:
       - ALL

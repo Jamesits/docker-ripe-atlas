@@ -35,8 +35,8 @@ jobs:
           tags: |
             type=edge,branch=master
             type=edge,branch=master,suffix=-probe
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }},suffix=-probe
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }},suffix=-probe
             type=ref,event=tag,pattern={{version}}
             type=ref,event=tag,pattern={{version}},suffix=-probe
       - uses: docker/metadata-action@v5
@@ -48,7 +48,7 @@ jobs:
             latest=false
           tags: |
             type=edge,branch=master,suffix=-anchor
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }},suffix=-anchor
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }},suffix=-anchor
             type=ref,event=tag,pattern={{version}},suffix=-anchor
       - uses: docker/bake-action@v6
         with:

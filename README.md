@@ -48,6 +48,32 @@ systemctl reload
 systemctl start ripe-atlas.service
 ```
 
+### Using [Docker Run](https://docs.docker.com/reference/cli/docker/container/run/)
+You may need to create some folders on you local host.\
+In this example we used /var/atlas-probe but you can choose whatever you like.\
+As long as you use the same folders in the run command (see the -v options)
+```shell
+sudo mkdir -p /var/atlas-probe/etc
+sudo mkdir -p /var/atlas-probe/var/spool
+sudo mkdir -p /var/atlas-probe/run
+sudo chown 101:999 /var/atlas-probe/etc
+```
+
+```shell
+docker run -d  \
+  --name ripe-atlas --hostname "$(hostname --fqdn)" \
+  --log-driver json-file --log-opt max-size=10m \
+  --cpus=1 --memory=64m --memory-reservation=64m \
+  -v /var/atlas-probe/etc:/etc/ripe-atlas \
+  -v /var/atlas-probe/var/spool:/var/spool/ripe-atlas \
+  -v /var/atlas-probe/run:/run/ripe-atlas \ 
+  -e RXTXRPT=yes \
+  --network <name of network> \ # Optional
+  --restart=unless-stopped \ # Optional
+ --label com.centurylinklabs.watchtower.enable=true \ $ Optional, when using Watchtower
+  jamesits/ripe-atlas:latest
+```
+
 ### Registering the Probe
 
 Fetch the generated public key:

@@ -1,6 +1,6 @@
 # RIPE Atlas Docker Image
 
-This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/software-probe/) packaged as a Docker image.
+This is the [RIPE Atlas software probe](https://atlas.ripe.net/docs/getting-started/what-is-ripe-atlas) packaged as a Docker image.
 
 ![Works - On My Machine](https://img.shields.io/badge/Works-On_My_Machine-2ea44f)
 ![Project Status - Feature Complete](https://img.shields.io/badge/Project_Status-Feature_Complete-2ea44f)

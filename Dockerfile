@@ -47,8 +47,8 @@ FROM base AS ripe-atlas-anchor
 COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-anchor_*.deb /tmp/
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y \
-	&& apt install -fy /tmp/ripe-atlas*.deb \
-	&& rm -rf /var/lib/apt/lists/* /tmp/*.deb
+	&& apt install -fy /tmp/*.deb \
+	&& rm -rfv /var/lib/apt/lists/* /tmp/*.deb /etc/ripe-atlas/probe_key*
 
 COPY --chown=0:0 rootfs_overrides/. /
 
@@ -68,8 +68,8 @@ FROM base AS ripe-atlas-probe
 COPY --from=builder /root/ripe-atlas-common_*.deb /root/ripe-atlas-probe_*.deb /tmp/
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y \
-	&& apt install -fy /tmp/ripe-atlas-*.deb \
-	&& rm -rf /var/lib/apt/lists/* /tmp/*.deb
+	&& apt install -fy /tmp/*.deb \
+	&& rm -rfv /var/lib/apt/lists/* /tmp/*.deb /etc/ripe-atlas/probe_key*
 
 COPY --chown=0:0 rootfs_overrides/. /
 

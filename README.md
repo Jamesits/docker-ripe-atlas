@@ -36,8 +36,8 @@ An example [`docker-compose.yaml`](/contrib/docker-compose/docker-compose.yaml) 
 
 ```shell
 cd contrib/docker-compose
-docker-compose pull
-docker-compose up -d
+docker compose pull
+docker compose up -d
 ```
 
 #### Using [`podman-systemd.unit`](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)

@@ -4,7 +4,7 @@ Documentation=https://github.com/Jamesits/docker-ripe-atlas
 
 [Container]
 Image=docker.io/jamesits/ripe-atlas:latest
-Memory=256m
+PodmanArgs=--memory=256m
 DropCapability=ALL
 AddCapability=NET_RAW
 # required for tini
@@ -22,15 +22,17 @@ AddCapability=DAC_OVERRIDE
 
 Environment=RXTXRPT=yes
 
-Volume=/etc/ripe-atlas:/etc/ripe-atlas
-Volume=/run/ripe-atlas:/run/ripe-atlas
-Volume=/var/spool/ripe-atlas:/var/spool/ripe-atlas
+Volume=/etc/ripe-atlas:/etc/ripe-atlas:U
+Volume=/run/ripe-atlas:/run/ripe-atlas:U
+Volume=/var/spool/ripe-atlas:/var/spool/ripe-atlas:U
 
 # https://docs.podman.io/en/latest/markdown/podman-auto-update.1.html
 AutoUpdate=registry
 
 [Service]
 Restart=always
+RestartSec=10s
+ExecStartPre=/usr/bin/mkdir -p /run/ripe-atlas
 
 [Install]
 WantedBy=multi-user.target

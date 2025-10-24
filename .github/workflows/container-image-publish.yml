@@ -62,7 +62,7 @@ jobs:
             artifacts.output=type=local,dest=out/
             ripe-atlas-anchor.output=type=registry
             ripe-atlas-probe.output=type=registry
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: "deb"
           path: |

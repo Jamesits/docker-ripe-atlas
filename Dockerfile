@@ -1,4 +1,4 @@
-FROM debian:12-slim AS base
+FROM debian:13-slim AS base
 
 ARG ATLAS_UID=101 ATLAS_MEAS_UID=102 ATLAS_GID=999
 

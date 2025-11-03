@@ -4,8 +4,8 @@ ARG ATLAS_UID=101 ATLAS_MEAS_UID=102 ATLAS_GID=999
 
 # pre-create the required user and group so that their IDs are consistent
 # https://github.com/RIPE-NCC/ripe-atlas-software-probe/blob/17566dd0129a47552556e1f355d33d0114124c60/config/common/ripe-atlas.users.conf.in
-RUN adduser --system --uid $ATLAS_UID --home /run/ripe-atlas ripe-atlas \
-	&& adduser --system --uid $ATLAS_MEAS_UID --home /var/spool/ripe-atlas ripe-atlas-measurement \
+RUN useradd --system --uid $ATLAS_UID --home /run/ripe-atlas ripe-atlas \
+	&& useradd --system --uid $ATLAS_MEAS_UID --home /var/spool/ripe-atlas ripe-atlas-measurement \
 	&& groupadd --force --system --gid $ATLAS_GID ripe-atlas \
 	&& usermod -aG ripe-atlas ripe-atlas \
 	&& usermod -aG ripe-atlas ripe-atlas-measurement

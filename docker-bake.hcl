@@ -5,6 +5,9 @@ variable "CR_DOCKER_HUB_PREFIX" {
 variable "IMAGE_TAG_PREFIX" {
     default = "docker.io/jamesits/ripe-atlas"
 }
+variable "IMAGE_GHCR_TAG_PREFIX" {
+    default = "ghcr.io/jamesits/ripe-atlas"
+}
 
 group "default" {
     targets = ["artifacts", "ripe-atlas-probe", "ripe-atlas-anchor"]
@@ -43,6 +46,8 @@ target "_ripe-atlas-probe" {
     tags = [
         "${IMAGE_TAG_PREFIX}:latest",
         "${IMAGE_TAG_PREFIX}:latest-probe",
+        "${IMAGE_GHCR_TAG_PREFIX}:latest",
+        "${IMAGE_GHCR_TAG_PREFIX}:latest-probe",
     ]
 }
 
@@ -58,6 +63,7 @@ target "_ripe-atlas-anchor" {
     ]
     tags = [
         "${IMAGE_TAG_PREFIX}:latest-anchor",
+        "${IMAGE_GHCR_TAG_PREFIX}:latest-anchor",
     ]
 }
 

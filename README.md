@@ -43,8 +43,9 @@ docker compose up -d
 #### Using [`podman-systemd.unit`](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 
 ```shell
+mkdir /etc/ripe-atlas /var/spool/ripe-atlas
 install --user=root --group=root --target /etc/containers/systemd/ -- contrib/podman-quadlet/*.container
-systemctl reload
+systemctl daemon-reload
 systemctl start ripe-atlas.service
 ```
 

@@ -160,7 +160,7 @@ Upstream software does not correctly use Linux [capabilities(7)](https://man7.or
 |-------------------|----------------|-------------------|-------|------------------------------------------|
 | root              | root           | separate          | YES   |                                          |
 | root              | non-root       | separate          | NO    | daemons does not start                   |
-| root              | root           | host              | ?     |                                          |
+| root              | root           | host              | YES   |                                          |
 | root              | non-root       | host              | NO    | daemons does not start                   |
 | rootless          | root           | separate          | YES   | traceroute might not work                |
 | rootless          | non-root       | separate          | NO    | daemons does not start                   |

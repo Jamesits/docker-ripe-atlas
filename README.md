@@ -59,6 +59,17 @@ cat /etc/ripe-atlas/probe_key.pub
 
 [Register](https://atlas.ripe.net/apply/swprobe/) the probe with your public key. After the registration being manually processed, you'll see your new probe in your account.
 
+## Configuration options
+
+Currently there are three runtime configuration options available.
+To use them, edit the environment variables in your file accordingly.
+
+| Configuration | Description | Default |
+| --- | --- | --- |
+| `RXTXRPT` | Sending interface traffic statistics as Atlas measurement results | `RXTXRPT=no` |
+| `TELNETD_PORT` | TCP port used for telnetd | `TELNETD_PORT=2023` |
+| `HTTP_POST_PORT` | TCP port used for httppost | `HTTP_POST_PORT=8080` |
+
 ## Building
 
 If you don't want to use the prebuilt image hosted on the Docker Hub, you can build your own image.

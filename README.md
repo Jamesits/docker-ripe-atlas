@@ -61,8 +61,8 @@ cat /etc/ripe-atlas/probe_key.pub
 
 ## Configuration options
 
-Currently there are three runtime configuration options available.
-To use them, edit the environment variables in your file accordingly.
+At the time of writing, there are three runtime configuration options available.
+To use them, edit the environment variables in your file accordingly. For more infos, check the [upstream docs](https://github.com/RIPE-NCC/ripe-atlas-software-probe?tab=readme-ov-file#configuration-options).
 
 | Configuration | Description | Default |
 | --- | --- | --- |

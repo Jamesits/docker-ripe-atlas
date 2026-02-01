@@ -2,10 +2,10 @@ services:
   ripe-atlas:
     image: docker.io/jamesits/ripe-atlas:latest
     restart: always
-    environment:
-      - RXTXRPT: "no"
-      - TELNETD_PORT: "2023"
-      - HTTP_POST_PORT: "8080"
+    # environment: # see docs for configuration options 
+    #  - RXTXRPT: "no"
+    #  - TELNETD_PORT: "2023"
+    #  - HTTP_POST_PORT: "8080"
     volumes:
       - "/etc/ripe-atlas:/etc/ripe-atlas"
       - "/run/ripe-atlas:/run/ripe-atlas"

@@ -3,9 +3,9 @@ services:
     image: docker.io/jamesits/ripe-atlas:latest
     restart: always
     # environment: # see docs for configuration options 
-    #  - RXTXRPT: "no"
-    #  - TELNETD_PORT: "2023"
-    #  - HTTP_POST_PORT: "8080"
+    #  - RXTXRPT=no
+    #  - TELNETD_PORT=2023
+    #  - HTTP_POST_PORT=8080
     volumes:
       - "/etc/ripe-atlas:/etc/ripe-atlas"
       - "/run/ripe-atlas:/run/ripe-atlas"
@@ -23,8 +23,8 @@ services:
       - CHOWN
       - FOWNER
       - DAC_OVERRIDE
-    mem_limit: "64000000000"
-    mem_reservation: 64m
+    mem_limit: "64m"
+    mem_reservation: "64m"
     labels:
       - "traefik.enable=false"
       - "com.centurylinklabs.watchtower.enable=true"

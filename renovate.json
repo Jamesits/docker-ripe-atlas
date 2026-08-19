@@ -4,5 +4,17 @@
         "config:recommended",
         "github>jamesits/.github//renovate/default",
         "github>jamesits/.github//renovate/group-monorepo"
+    ],
+    "packageRules": [
+        {
+            "groupName": "{{manager}} dependencies",
+            "groupSlug": "{{manager}}",
+            "matchManagers": [ "git-submodules" ],
+            "matchPackageNames": [ "*" ],
+            "labels": [
+                "renovate:{{manager}}"
+            ],
+            "minimumReleaseAge": null
+        }
     ]
 }

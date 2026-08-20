@@ -47,9 +47,9 @@ function init_dir() {
 	chmod "$2" -- "$1" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
 	chown "$3:$4" -- "$1" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
 }
-init_dir "/run/ripe-atlas" "775" "ripe-atlas-measurement" "ripe-atlas"
+init_dir "/run/ripe-atlas" "755" "ripe-atlas-measurement" "ripe-atlas"
 init_dir "/var/spool/ripe-atlas" "2775" "ripe-atlas" "ripe-atlas"
-init_dir "/etc/ripe-atlas" "755" "ripe-atlas" "ripe-atlas"
+init_dir "/etc/ripe-atlas" "770" "ripe-atlas" "ripe-atlas"
 
 # the Debian package wipes the status files whenever the package version changes (postrm "upgrade").
 # A container restart is indistinguishable from an upgrade, so compare the version installed in the

@@ -18,16 +18,15 @@ RUN install --owner=ripe-atlas-measurement --group=ripe-atlas --mode=0755 --dire
 # install common packages
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y \
-	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools tini \
+	&& apt-get install -y libcap2-bin iproute2 openssh-client procps net-tools tini systemd \
 	&& rm -rf /var/lib/apt/lists/*
 
 ######## builder ########
 FROM base AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
-# Note: systemd must exist for the package to build; otherwise systemd unit templates will fail to generate
 RUN apt-get update -y \
-	&& apt-get install -y git build-essential debhelper libssl-dev autotools-dev systemd \
+	&& apt-get install -y git build-essential debhelper libssl-dev autotools-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 WORKDIR /root

@@ -51,10 +51,10 @@ RUN apt-get update -y \
 
 COPY --chown=0:0 rootfs_overrides/. /
 
-RUN mkdir -p /usr/share/factory/etc /usr/share/factory/run /usr/share/factory/var/spool \
-	&& cp -rpv /etc/ripe-atlas /usr/share/factory/etc/ripe-atlas \
-	&& cp -rpv /run/ripe-atlas /usr/share/factory/run/ripe-atlas \
-	&& cp -rpv /var/spool/ripe-atlas /usr/share/factory/var/spool/ripe-atlas
+# /run/ripe-atlas and /var/spool/ripe-atlas hold no factory content: systemd-tmpfiles recreates
+# their whole directory tree from the config shipped with the package
+RUN mkdir -p /usr/share/factory/etc \
+	&& cp -rpv /etc/ripe-atlas /usr/share/factory/etc/ripe-atlas
 
 WORKDIR /run/ripe-atlas
 VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas", "/var/spool/ripe-atlas" ]
@@ -72,10 +72,10 @@ RUN apt-get update -y \
 
 COPY --chown=0:0 rootfs_overrides/. /
 
-RUN mkdir -p /usr/share/factory/etc /usr/share/factory/run /usr/share/factory/var/spool \
-	&& cp -rpv /etc/ripe-atlas /usr/share/factory/etc/ripe-atlas \
-	&& cp -rpv /run/ripe-atlas /usr/share/factory/run/ripe-atlas \
-	&& cp -rpv /var/spool/ripe-atlas /usr/share/factory/var/spool/ripe-atlas
+# /run/ripe-atlas and /var/spool/ripe-atlas hold no factory content: systemd-tmpfiles recreates
+# their whole directory tree from the config shipped with the package
+RUN mkdir -p /usr/share/factory/etc \
+	&& cp -rpv /etc/ripe-atlas /usr/share/factory/etc/ripe-atlas
 
 WORKDIR /run/ripe-atlas
 VOLUME [ "/etc/ripe-atlas", "/run/ripe-atlas", "/var/spool/ripe-atlas" ]

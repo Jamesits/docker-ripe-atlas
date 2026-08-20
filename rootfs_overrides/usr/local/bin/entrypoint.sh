@@ -13,7 +13,7 @@ declare -a OPTIONS=(
 	"HTTP_POST_PORT"
 	"TELNETD_PORT"
 )
-# When set to 1, the script will ignore all permissions and ownership issues.
+# When set to 1, the script will ignore all permissions/ownership issues and ignore all migration errors.
 ENTRYPOINT_DO_NOT_SET_USER="${ENTRYPOINT_DO_NOT_SET_USER:-0}"
 # When set to 1, the script will not write to the config file. You must provide your own config file.
 ENTRYPOINT_SKIP_CONFIG_FILE="${ENTRYPOINT_SKIP_CONFIG_FILE:-0}"
@@ -32,31 +32,21 @@ if [ -d "/var/atlas-probe" ]; then
 fi
 
 # cleanup
+# https://github.com/Jamesits/docker-ripe-atlas/issues/85#issuecomment-5354752202
 rm -fv -- /etc/ripe-atlas/reg_servers.sh
-
-# create essential directories and try to fix their permissions
-function init_dir() {
-	if [ -z "$( ls -A "$1" )" ]; then
-		>&2 printf "[entrypoint.sh]: Initializing directory %s\n" "$1"
-		mkdir -p -- "$1"
-		cp -rpv -- "/usr/share/factory/$1/." "$1" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
-	else
-		# try to copy missing files only, but do not overwrite existing files
-		cp -rpnv -- "/usr/share/factory/$1/." "$1" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
-	fi
-	chmod "$2" -- "$1" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
-	chown "$3:$4" -- "$1" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
-}
-init_dir "/run/ripe-atlas" "755" "ripe-atlas-measurement" "ripe-atlas"
-init_dir "/var/spool/ripe-atlas" "2775" "ripe-atlas" "ripe-atlas"
-init_dir "/etc/ripe-atlas" "770" "ripe-atlas" "ripe-atlas"
-
 # the Debian package wipes the status files whenever the package version changes (postrm "upgrade").
-# A container restart is indistinguishable from an upgrade, so compare the version installed in the
-# image against the one recorded in the runtime directory.
 if [ -f "${VERSION_FILE}" ] && ! cmp -s -- "${VERSION_FILE}" "${VERSION_STAMP}"; then
 	>&2 printf "[entrypoint.sh]: Probe version changed to %s, cleaning up %s\n" "$( cat -- "${VERSION_FILE}" )" "${STATUS_DIR}"
 	rm -fv -- "${STATUS_DIR}"/* || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
+fi
+
+# create essential directories and try to fix their permissions
+# ripe-atlas.conf comes with the package and covers /run/ripe-atlas and /var/spool/ripe-atlas;
+# ripe-atlas-docker.conf comes from rootfs_overrides and covers /etc/ripe-atlas, which the package
+# creates from its maintainer scripts instead
+>&2 printf "[entrypoint.sh]: Initializing directories\n"
+systemd-tmpfiles --create ripe-atlas.conf ripe-atlas-docker.conf || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
+if [ -f "${VERSION_FILE}" ]; then
 	cp -pv -- "${VERSION_FILE}" "${VERSION_STAMP}" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
 fi
 

@@ -25,6 +25,9 @@ if [ -d "/var/atlas-probe" ]; then
 	cp -rpnv /var/atlas-probe/etc/. /etc/ripe-atlas/ || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
 fi
 
+# cleanup
+rm -fv -- /etc/ripe-atlas/reg_servers.sh
+
 # create essential directories and try to fix their permissions
 function init_dir() {
 	if [ -z "$( ls -A "$1" )" ]; then

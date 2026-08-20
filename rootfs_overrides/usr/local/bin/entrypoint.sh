@@ -2,6 +2,12 @@
 set -Eeuo pipefail
 
 CONFIG_FILE="/etc/ripe-atlas/config.txt"
+# the config file as shipped in the image, containing the defaults the package's postinst set
+CONFIG_FILE_FACTORY="/usr/share/factory/etc/ripe-atlas/config.txt"
+MODE_FILE="/etc/ripe-atlas/mode"
+STATUS_DIR="/run/ripe-atlas/status"
+VERSION_FILE="/usr/share/ripe-atlas/FIRMWARE_APPS_VERSION"
+VERSION_STAMP="/run/ripe-atlas/.version"
 declare -a OPTIONS=(
 	"RXTXRPT"
 	"HTTP_POST_PORT"
@@ -45,12 +51,35 @@ init_dir "/run/ripe-atlas" "775" "ripe-atlas-measurement" "ripe-atlas"
 init_dir "/var/spool/ripe-atlas" "2775" "ripe-atlas" "ripe-atlas"
 init_dir "/etc/ripe-atlas" "755" "ripe-atlas" "ripe-atlas"
 
-# set probe configuration
-if [ ! -f "/etc/ripe-atlas/mode.atlasswprobe" ]; then
-	printf "prod\n" > "/etc/ripe-atlas/mode.atlasswprobe"
+# the Debian package wipes the status files whenever the package version changes (postrm "upgrade").
+# A container restart is indistinguishable from an upgrade, so compare the version installed in the
+# image against the one recorded in the runtime directory.
+if [ -f "${VERSION_FILE}" ] && ! cmp -s -- "${VERSION_FILE}" "${VERSION_STAMP}"; then
+	>&2 printf "[entrypoint.sh]: Probe version changed to %s, cleaning up %s\n" "$( cat -- "${VERSION_FILE}" )" "${STATUS_DIR}"
+	rm -fv -- "${STATUS_DIR}"/* || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
+	cp -pv -- "${VERSION_FILE}" "${VERSION_STAMP}" || [ "${ENTRYPOINT_DO_NOT_SET_USER}" == "1" ]
 fi
+
+# set probe configuration
 if [ "${ENTRYPOINT_SKIP_CONFIG_FILE}" != "1" ]; then
-	printf "CHECK_ATLASDATA_TMPFS=no\n" > "${CONFIG_FILE}"
+	# mode
+	# the Debian package stages a migrated mode file as "mode.atlasswprobe" and renames it in postinst;
+	# the probe itself only ever reads "mode"
+	if [ -f "${MODE_FILE}.atlasswprobe" ]; then
+		mv -v -- "${MODE_FILE}.atlasswprobe" "${MODE_FILE}"
+	fi
+	if [ ! -f "${MODE_FILE}" ]; then
+		printf "prod\n" > "${MODE_FILE}"
+	fi
+
+	# keep the defaults the package shipped (the anchor package sets RXTXRPT=yes), except for the
+	# options we are about to set ourselves
+	if [ -f "${CONFIG_FILE_FACTORY}" ]; then
+		>&2 printf "[entrypoint.sh]: Inheriting default options from %s\n" "${CONFIG_FILE_FACTORY}"
+		OPTIONS_RE="$( IFS="|"; printf "%s" "${OPTIONS[*]}" )"
+		# grep exits 1 when the file only contains options we manage ourselves
+		grep -vE "^[[:space:]]*(${OPTIONS_RE})=" -- "${CONFIG_FILE_FACTORY}" >> "${CONFIG_FILE}" || true
+	fi
 	for OPT in "${OPTIONS[@]}"; do
 		if [ ! -z "${!OPT+x}" ]; then
 			>&2 printf "[entrypoint.sh]: Setting option %s=%s\n" "${OPT}" "${!OPT}"

@@ -1,6 +1,6 @@
 services:
   ripe-atlas:
-    image: docker.io/jamesits/ripe-atlas:latest
+    image: docker.io/jamesits/ripe-atlas:latest@sha256:841459abe5aac56833e94832b2460423b5b9532b6420df73bfec54dd3303643b
     restart: always
     # environment: # see docs for configuration options 
     #  - RXTXRPT=no

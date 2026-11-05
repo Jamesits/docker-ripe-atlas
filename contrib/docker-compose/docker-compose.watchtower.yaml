@@ -1,7 +1,7 @@
 # a very aggressive watchtower config, useful when deploying in a headless environment
 services:
   watchtower:
-    image: docker.io/nickfedor/watchtower:latest
+    image: docker.io/nickfedor/watchtower:latest@sha256:e96976bcbeaf0a9adeddc9016a539c27a2245ef6bb7d3ca97ed106783350d387
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

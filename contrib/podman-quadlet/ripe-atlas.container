@@ -3,7 +3,7 @@ Description=RIPE Atlas Software Probe
 Documentation=https://github.com/Jamesits/docker-ripe-atlas
 
 [Container]
-Image=docker.io/jamesits/ripe-atlas:latest
+Image=docker.io/jamesits/ripe-atlas:latest@sha256:841459abe5aac56833e94832b2460423b5b9532b6420df73bfec54dd3303643b
 PodmanArgs=--memory=256m
 DropCapability=ALL
 AddCapability=NET_RAW

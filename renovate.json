@@ -5,6 +5,9 @@
         "github>jamesits/.github//renovate/default",
         "github>jamesits/.github//renovate/group-monorepo"
     ],
+    "ignorePaths": [
+        "**/contrib/**"
+    ],
     "packageRules": [
         {
             "groupName": "{{manager}} dependencies",
